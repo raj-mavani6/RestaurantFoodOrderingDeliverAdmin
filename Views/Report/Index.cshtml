@@ -1,0 +1,108 @@
+@{
+    ViewData["Title"] = "Reports & Analytics";
+}
+
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="page-heading">
+                <i class="fas fa-chart-line me-2"></i>Reports & Analytics
+            </h2>
+            <p class="text-muted">Comprehensive insights into delivery performance and operations</p>
+        </div>
+    </div>
+
+    <!-- Report Cards Grid -->
+    <div class="row g-4">
+        <!-- Delivery Users Report -->
+        <div class="col-md-4">
+            <a href="@Url.Action("DeliveryUsers", "Report")" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm hover-shadow">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-users fa-3x text-primary"></i>
+                        </div>
+                        <h4 class="card-title text-dark">Delivery Users</h4>
+                        <p class="card-text text-muted">User status, ratings, and performance metrics</p>
+                        <span class="btn btn-outline-primary mt-2">View Report</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Attendance Report -->
+        <div class="col-md-4">
+             <a href="@Url.Action("Attendance", "Report")" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm hover-shadow">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-clock fa-3x text-info"></i>
+                        </div>
+                        <h4 class="card-title text-dark">Attendance</h4>
+                        <p class="card-text text-muted">Daily presence, working hours, and trends</p>
+                        <span class="btn btn-outline-info mt-2">View Report</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Orders Report -->
+        <div class="col-md-4">
+             <a href="@Url.Action("Orders", "Report")" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm hover-shadow">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-shopping-cart fa-3x text-success"></i>
+                        </div>
+                        <h4 class="card-title text-dark">Orders Analysis</h4>
+                        <p class="card-text text-muted">Order volume, status breakdown, and history</p>
+                        <span class="btn btn-outline-success mt-2">View Report</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Earnings Report -->
+        <div class="col-md-4">
+             <a href="@Url.Action("Earnings", "Report")" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm hover-shadow">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-wallet fa-3x text-warning"></i>
+                        </div>
+                        <h4 class="card-title text-dark">Earnings & Payouts</h4>
+                        <p class="card-text text-muted">Revenue tracking, fees, and tips analysis</p>
+                        <span class="btn btn-outline-warning mt-2">View Report</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Leave Report -->
+        <div class="col-md-4">
+            <a href="@Url.Action("Leave", "Report")" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm hover-shadow">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-calendar-minus fa-3x text-danger"></i>
+                        </div>
+                        <h4 class="card-title text-dark">Leave Management</h4>
+                        <p class="card-text text-muted">Leave requests, approvals, and history</p>
+                        <span class="btn btn-outline-danger mt-2">View Report</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-shadow {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .hover-shadow:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+</style>

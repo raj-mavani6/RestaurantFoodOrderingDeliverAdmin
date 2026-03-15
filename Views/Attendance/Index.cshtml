@@ -1,0 +1,261 @@
+@model IEnumerable<RestaurantFoodOrderingDeliverAdmin.Models.Attendance>
+@{
+    ViewData["Title"] = "Attendance Management";
+}
+
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="page-heading">
+                <i class="fas fa-calendar-check me-2"></i>Attendance Management
+            </h2>
+            <p class="text-muted">Track and manage delivery partner attendance</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="@Url.Action("Create", "Attendance")" class="btn btn-primary-custom">
+                <i class="fas fa-plus me-2"></i>Add Attendance
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-primary">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <div class="stat-content">
+                    <h6>Total Records</h6>
+                    <h3>@ViewBag.TotalRecords</h3>
+                    <small class="text-muted">All time</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h6>Present Today</h6>
+                    <h3>@ViewBag.TodayPresent</h3>
+                    <small class="text-muted">On time</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-warning">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <h6>Late Today</h6>
+                    <h3>@ViewBag.TodayLate</h3>
+                    <small class="text-muted">Arrived late</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-danger">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h6>Absent Today</h6>
+                    <h3>@ViewBag.TodayAbsent</h3>
+                    <small class="text-muted">Not present</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                <input type="text" class="form-control" id="searchInput" placeholder="Search by user name...">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" id="statusFilter">
+                <option value="">All Status</option>
+                <option value="Present">Present</option>
+                <option value="Absent">Absent</option>
+                <option value="Late">Late</option>
+                <option value="Half Day">Half Day</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <input type="date" class="form-control" id="dateFilter">
+        </div>
+    </div>
+
+    <!-- Attendance Table -->
+    <div class="card">
+        <div class="card-header bg-primary-custom text-white">
+            <h5 class="mb-0"><i class="fas fa-list me-2"></i>Attendance Records</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="attendanceTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User</th>
+                            <th>Date</th>
+                            <th>Check In</th>
+                            <th>Check Out</th>
+                            <th>Status</th>
+                            <th>Int. Start</th>
+                            <th>Int. End</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var attendance in Model)
+                        {
+                            <tr>
+                                <td><strong>#@attendance.AttendanceId</strong></td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-user-circle fa-2x text-primary me-2"></i>
+                                        <div>
+                                            <strong>@(attendance.DeliveryUser?.FullName ?? "Unknown")</strong>
+                                            <br>
+                                            <small class="text-muted">ID: @attendance.DeliveryUserId</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>@attendance.AttendanceDate.ToString("dd MMM yyyy")</td>
+                                <td>
+                                    <i class="fas fa-sign-in-alt text-success me-1"></i>
+                                    @(attendance.CheckInTime ?? "N/A")
+                                </td>
+                                <td>
+                                    <i class="fas fa-sign-out-alt text-danger me-1"></i>
+                                    @(attendance.CheckOutTime ?? "N/A")
+                                </td>
+                                <td>
+                                    @if (attendance.Status == "Present")
+                                    {
+                                        <span class="badge bg-success">Present</span>
+                                    }
+                                    else if (attendance.Status == "Late")
+                                    {
+                                        <span class="badge bg-warning">Late</span>
+                                    }
+                                    else if (attendance.Status == "Half Day")
+                                    {
+                                        <span class="badge bg-info">Half Day</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Absent</span>
+                                    }
+                                </td>
+                                <td>
+                                    <i class="fas fa-pause-circle text-warning me-1"></i>
+                                    @(attendance.IntermediateStartTime ?? "N/A")
+                                </td>
+                                <td>
+                                    <i class="fas fa-play-circle text-info me-1"></i>
+                                    @(attendance.IntermediateEndTime ?? "N/A")
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="@Url.Action("ByUser", "Attendance", new { userId = attendance.DeliveryUserId })" 
+                                           class="btn btn-outline-info" title="View User Calendar">
+                                            <i class="fas fa-calendar-alt"></i>
+                                        </a>
+                                        <a href="@Url.Action("Details", "Attendance", new { id = attendance.AttendanceId })" 
+                                           class="btn btn-outline-primary" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="@Url.Action("Edit", "Attendance", new { id = attendance.AttendanceId })" 
+                                           class="btn btn-outline-success" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="@Url.Action("Delete", "Attendance", new { id = attendance.AttendanceId })" 
+                                           class="btn btn-outline-danger" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    }
+    
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+    
+    .stat-icon.bg-primary { background: linear-gradient(135deg, #0d6efd, #0a58ca); }
+    .stat-icon.bg-success { background: linear-gradient(135deg, #198754, #146c43); }
+    .stat-icon.bg-warning { background: linear-gradient(135deg, #ffc107, #ffb300); }
+    .stat-icon.bg-danger { background: linear-gradient(135deg, #dc3545, #bb2d3b); }
+    
+    .stat-content h6 { font-size: 0.85rem; color: #666; margin-bottom: 5px; }
+    .stat-content h3 { font-size: 2rem; font-weight: bold; margin-bottom: 0; }
+</style>
+
+@section Scripts {
+    <script>
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            filterTable();
+        });
+        
+        // Status filter
+        document.getElementById('statusFilter').addEventListener('change', function() {
+            filterTable();
+        });
+        
+        function filterTable() {
+            var searchText = document.getElementById('searchInput').value.toLowerCase();
+            var statusFilter = document.getElementById('statusFilter').value.toLowerCase();
+            var rows = document.querySelectorAll('#attendanceTable tbody tr');
+            
+            rows.forEach(function(row) {
+                var text = row.textContent.toLowerCase();
+                var statusCell = row.querySelector('td:nth-child(6)').textContent.toLowerCase();
+                
+                var matchesSearch = text.includes(searchText);
+                var matchesStatus = statusFilter === '' || statusCell.includes(statusFilter);
+                
+                row.style.display = (matchesSearch && matchesStatus) ? '' : 'none';
+            });
+        }
+    </script>
+}

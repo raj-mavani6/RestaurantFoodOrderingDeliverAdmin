@@ -1,0 +1,183 @@
+@model IEnumerable<RestaurantFoodOrderingDeliverAdmin.Models.Attendance>
+@{
+    ViewData["Title"] = "Attendance Report";
+    var period = ViewBag.Period as string;
+    
+    // Dynamic Grouping
+    // "Month option ma month wise data shoe nathi thata" -> Month = Group by Month
+    // "Week ma week mujab" -> Week = Group by Week (Start of Week - Monday)
+    // "Year ma only year mujab" -> Year = Group by Year
+    // "All ma bdhi date" -> All = Group by Day
+
+    var groupBy = period switch 
+    {
+        "month" => "month",
+        "year" => "year",
+        "week" => "week",
+        _ => "day"
+    };
+
+    // Helper for StartOfWeek
+    Func<DateTime, DateTime> getStartOfWeek = (dt) => 
+    {
+        int diff = (7 + (dt.DayOfWeek - DayOfWeek.Monday)) % 7;
+        return dt.AddDays(-1 * diff).Date;
+    };
+
+    var attendanceByDate = Model
+        .GroupBy(a => groupBy == "month" ? new DateTime(a.AttendanceDate.Year, a.AttendanceDate.Month, 1) :
+                      groupBy == "year" ? new DateTime(a.AttendanceDate.Year, 1, 1) : 
+                      groupBy == "week" ? getStartOfWeek(a.AttendanceDate) :
+                      a.AttendanceDate.Date)
+        .OrderBy(g => g.Key)
+        .Select(g => new { 
+            Date = groupBy == "month" ? g.Key.ToString("MMM yyyy") : 
+                   groupBy == "year" ? g.Key.ToString("yyyy") : 
+                   groupBy == "week" ? g.Key.ToString("dd MMM") + "-" + g.Key.AddDays(6).ToString("dd MMM") :
+                   g.Key.ToString("dd MMM"), 
+            Count = g.Count() 
+        })
+        .ToList();
+        
+    var labels = System.Text.Json.JsonSerializer.Serialize(attendanceByDate.Select(x => x.Date));
+    var data = System.Text.Json.JsonSerializer.Serialize(attendanceByDate.Select(x => x.Count));
+}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Report")">Reports</a></li>
+                    <li class="breadcrumb-item active">Attendance</li>
+                </ol>
+            </nav>
+            <h2 class="page-heading"><i class="fas fa-clipboard-check me-2"></i>Attendance Analytics</h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <div class="btn-group period-filter">
+                <a href="@Url.Action("Attendance", new { period = "week" })" class="btn btn-outline-primary @(period == "week" ? "active" : "")">Week</a>
+                <a href="@Url.Action("Attendance", new { period = "month" })" class="btn btn-outline-primary @(period == "month" ? "active" : "")">Month</a>
+                <a href="@Url.Action("Attendance", new { period = "year" })" class="btn btn-outline-primary @(period == "year" ? "active" : "")">Year</a>
+                <a href="@Url.Action("Attendance", new { period = "all" })" class="btn btn-outline-primary @(period == "all" ? "active" : "")">All</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Chart -->
+    <div class="card chart-card mb-4">
+        <div class="chart-header">
+            <h5 class="chart-title">Attendance Trends</h5>
+        </div>
+        <div class="card-body">
+            <div class="chart-container">
+                <canvas id="attendanceChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Logs -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3">
+             <h5 class="card-title mb-0">Attendance Logs</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">Date</th>
+                            <th>Partner</th>
+                            <th>Check-In</th>
+                            <th>Check-Out</th>
+                            <th>Inter. Start</th>
+                            <th>Inter. End</th>
+                            <th>Inter. Time</th>
+                            <th>Status</th>
+                            <th>Hours</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-4">@item.AttendanceDate.ToString("dd MMM yyyy")</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="user-avatar-small">
+                                           @if(item.DeliveryUser != null) { 
+                                               @item.DeliveryUser.FullName.Substring(0,1) 
+                                           } else { <text>?</text> }
+                                        </div>
+                                        <span>@(item.DeliveryUser?.FullName ?? "Unknown")</span>
+                                    </div>
+                                </td>
+                                <td><span class="text-success">@(item.CheckInTime ?? "-")</span></td>
+                                <td><span class="text-danger">@(item.CheckOutTime ?? "-")</span></td>
+                                <td>@(item.IntermediateStartTime ?? "-")</td>
+                                <td>@(item.IntermediateEndTime ?? "-")</td>
+                                <td>
+                                    @{
+                                        string interDurationDisplay = "-";
+                                        if (!string.IsNullOrEmpty(item.IntermediateStartTime) && !string.IsNullOrEmpty(item.IntermediateEndTime))
+                                        {
+                                            try 
+                                            {
+                                                DateTime start = DateTime.Parse(item.IntermediateStartTime);
+                                                DateTime end = DateTime.Parse(item.IntermediateEndTime);
+                                                TimeSpan duration = end - start;
+                                                interDurationDisplay = $"{(int)duration.TotalHours}h {duration.Minutes}m";
+                                            }
+                                            catch 
+                                            {
+                                                interDurationDisplay = "Err";
+                                            }
+                                        }
+                                    }
+                                    @interDurationDisplay
+                                </td>
+                                <td>
+                                    <span class="badge @(item.Status == "Present" ? "bg-success" : "bg-warning")">@item.Status</span>
+                                </td>
+                                <td>
+                                    @{
+                                        string hoursDisplay = "-";
+                                        if (!string.IsNullOrEmpty(item.CheckInTime) && !string.IsNullOrEmpty(item.CheckOutTime))
+                                        {
+                                            try 
+                                            {
+                                                DateTime inTime = DateTime.Parse(item.CheckInTime);
+                                                DateTime outTime = DateTime.Parse(item.CheckOutTime);
+                                                TimeSpan duration = outTime - inTime;
+                                                hoursDisplay = $"{(int)duration.TotalHours}h {duration.Minutes}m";
+                                            }
+                                            catch 
+                                            {
+                                                hoursDisplay = "Err";
+                                            }
+                                        }
+                                    }
+                                    @hoursDisplay
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script id="chartDataLabels" type="application/json">@Html.Raw(labels)</script>
+    <script id="chartDataValues" type="application/json">@Html.Raw(data)</script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var labels = JSON.parse(document.getElementById('chartDataLabels').textContent);
+            var data = JSON.parse(document.getElementById('chartDataValues').textContent);
+
+            initBarChart('attendanceChart', labels, data, 'Staff Present', '#0dcaf0');
+        });
+    </script>
+}

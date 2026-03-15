@@ -1,0 +1,392 @@
+@model IEnumerable<RestaurantFoodOrderingDeliverAdmin.Models.Attendance>
+@{
+    ViewData["Title"] = "User Attendance - Calendar";
+    var user = ViewBag.User as RestaurantFoodOrderingDeliverAdmin.Models.DeliveryUser;
+    var currentMonth = (int)(ViewBag.SelectedMonth ?? DateTime.Now.Month);
+    var currentYear = (int)(ViewBag.SelectedYear ?? DateTime.Now.Year);
+}
+
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Dashboard", "Home")">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Attendance")">Attendance</a></li>
+                    <li class="breadcrumb-item active">User Attendance</li>
+                </ol>
+            </nav>
+            <h2 class="page-heading">
+                <i class="fas fa-calendar-alt me-2"></i>@(user?.FullName ?? "User")'s Attendance
+            </h2>
+            <p class="text-muted">Calendar view of attendance records</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="@Url.Action("Index", "Attendance")" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to List
+            </a>
+        </div>
+    </div>
+
+    <!-- User Info Card -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body d-flex align-items-center">
+                    <i class="fas fa-user-circle fa-4x text-primary me-3"></i>
+                    <div>
+                        <h5 class="mb-1">@(user?.FullName ?? "Unknown")</h5>
+                        <p class="text-muted mb-0"><i class="fas fa-phone me-1"></i>@(user?.Phone ?? "N/A")</p>
+                        <p class="text-muted mb-0"><i class="fas fa-envelope me-1"></i>@(user?.Email ?? "N/A")</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-primary">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h6>Total Records</h6>
+                            <h3>@Model.Count()</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-success">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h6>Present</h6>
+                            <h3>@Model.Count(a => a.Status == "Present")</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-warning">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h6>Late</h6>
+                            <h3>@Model.Count(a => a.Status == "Late")</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-danger">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h6>Absent</h6>
+                            <h3>@Model.Count(a => a.Status == "Absent")</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Month and Year Selector -->
+    <div class="row mb-4">
+        <div class="col-md-2">
+            <label class="form-label fw-bold">Month</label>
+            <select class="form-select" id="monthSelector">
+                @for (int i = 1; i <= 12; i++)
+                {
+                    var monthName = new DateTime(2025, i, 1).ToString("MMMM");
+                    if (i == currentMonth)
+                    {
+                        <option value="@i" selected>@monthName</option>
+                    }
+                    else
+                    {
+                        <option value="@i">@monthName</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label fw-bold">Year</label>
+            <select class="form-select" id="yearSelector">
+                @for (int year = 2023; year <= 2030; year++)
+                {
+                    if (year == currentYear)
+                    {
+                        <option value="@year" selected>@year</option>
+                    }
+                    else
+                    {
+                        <option value="@year">@year</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="col-md-8 d-flex align-items-end">
+            <div class="d-flex gap-3">
+                <span><span class="badge bg-success">●</span> Present</span>
+                <span><span class="badge bg-warning">●</span> Late</span>
+                <span><span class="badge bg-info">●</span> Half Day</span>
+                <span><span class="badge bg-danger">●</span> Absent</span>
+                <span><span class="badge bg-secondary">●</span> No Record</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar View -->
+    <div class="card">
+        <div class="card-header bg-primary-custom text-white">
+            <h5 class="mb-0"><i class="fas fa-calendar me-2"></i>Attendance Calendar</h5>
+        </div>
+        <div class="card-body">
+            <div class="calendar-container">
+                <table class="table table-bordered calendar-table">
+                    <thead>
+                        <tr class="text-center bg-light">
+                            <th>Sunday</th>
+                            <th>Monday</th>
+                            <th>Tuesday</th>
+                            <th>Wednesday</th>
+                            <th>Thursday</th>
+                            <th>Friday</th>
+                            <th>Saturday</th>
+                        </tr>
+                    </thead>
+                    <tbody id="calendarBody">
+                        @{
+                            var firstDayOfMonth = new DateTime(currentYear, currentMonth, 1);
+                            var daysInMonth = DateTime.DaysInMonth(currentYear, currentMonth);
+                            var startDay = (int)firstDayOfMonth.DayOfWeek;
+                            var day = 1;
+                            var attendanceDict = Model.ToDictionary(a => a.AttendanceDate.Date, a => a);
+                            
+                            for (int week = 0; week < 6 && day <= daysInMonth; week++)
+                            {
+                                <tr>
+                                @for (int dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++)
+                                {
+                                    if ((week == 0 && dayOfWeek < startDay) || day > daysInMonth)
+                                    {
+                                        <td class="calendar-cell empty"></td>
+                                    }
+                                    else
+                                    {
+                                        var currentDate = new DateTime(currentYear, currentMonth, day);
+                                        var hasAttendance = attendanceDict.ContainsKey(currentDate);
+                                        var attendance = hasAttendance ? attendanceDict[currentDate] : null;
+                                        var statusClass = "secondary";
+                                        var statusIcon = "question-circle";
+                                        
+                                        if (hasAttendance && attendance != null)
+                                        {
+                                            switch (attendance.Status)
+                                            {
+                                                case "Present":
+                                                    statusClass = "success";
+                                                    statusIcon = "check-circle";
+                                                    break;
+                                                case "Late":
+                                                    statusClass = "warning";
+                                                    statusIcon = "clock";
+                                                    break;
+                                                case "Half Day":
+                                                    statusClass = "info";
+                                                    statusIcon = "adjust";
+                                                    break;
+                                                case "Absent":
+                                                    statusClass = "danger";
+                                                    statusIcon = "times-circle";
+                                                    break;
+                                            }
+                                        }
+                                        
+                                        <td class="calendar-cell @(currentDate.Date == DateTime.Today.Date ? "today" : "") @(hasAttendance ? "has-record" : "")">
+                                            <div class="day-number">@day</div>
+                                            @if (hasAttendance && attendance != null)
+                                            {
+                                                <div class="attendance-badge bg-@statusClass" title="@attendance.Status">
+                                                    <i class="fas fa-@statusIcon"></i>
+                                                </div>
+                                                <div class="time-info">
+                                                    <small>@(attendance.CheckInTime ?? "-") - @(attendance.CheckOutTime ?? "-")</small>
+                                                </div>
+                                            }
+                                        </td>
+                                        day++;
+                                    }
+                                }
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Records Table -->
+    <div class="card mt-4">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0"><i class="fas fa-list me-2"></i>Recent Attendance Records</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Check In</th>
+                            <th>Check Out</th>
+                            <th>Int. Start</th>
+                            <th>Int. End</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var attendance in Model.OrderByDescending(a => a.AttendanceDate).Take(10))
+                        {
+                            <tr>
+                                <td>@attendance.AttendanceDate.ToString("dd MMM yyyy")</td>
+                                <td><i class="fas fa-sign-in-alt text-success me-1"></i>@(attendance.CheckInTime ?? "N/A")</td>
+                                <td><i class="fas fa-sign-out-alt text-danger me-1"></i>@(attendance.CheckOutTime ?? "N/A")</td>
+                                <td><i class="fas fa-pause-circle text-warning me-1"></i>@(attendance.IntermediateStartTime ?? "N/A")</td>
+                                <td><i class="fas fa-play-circle text-info me-1"></i>@(attendance.IntermediateEndTime ?? "N/A")</td>
+                                <td>
+                                    @if (attendance.Status == "Present")
+                                    {
+                                        <span class="badge bg-success">Present</span>
+                                    }
+                                    else if (attendance.Status == "Late")
+                                    {
+                                        <span class="badge bg-warning">Late</span>
+                                    }
+                                    else if (attendance.Status == "Half Day")
+                                    {
+                                        <span class="badge bg-info">Half Day</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Absent</span>
+                                    }
+                                </td>
+                                <td>
+                                    <a href="@Url.Action("Details", "Attendance", new { id = attendance.AttendanceId })" 
+                                       class="btn btn-sm btn-outline-primary" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+    }
+    
+    .stat-icon.bg-primary { background: linear-gradient(135deg, #0d6efd, #0a58ca); }
+    .stat-icon.bg-success { background: linear-gradient(135deg, #198754, #146c43); }
+    .stat-icon.bg-warning { background: linear-gradient(135deg, #ffc107, #ffb300); }
+    .stat-icon.bg-danger { background: linear-gradient(135deg, #dc3545, #bb2d3b); }
+    
+    .stat-content h6 { font-size: 0.75rem; color: #666; margin-bottom: 2px; }
+    .stat-content h3 { font-size: 1.5rem; font-weight: bold; margin-bottom: 0; }
+    
+    .calendar-table {
+        table-layout: fixed;
+    }
+    
+    .calendar-cell {
+        height: 100px;
+        vertical-align: top;
+        padding: 5px !important;
+        position: relative;
+    }
+    
+    .calendar-cell.empty {
+        background: #f8f9fa;
+    }
+    
+    .calendar-cell.today {
+        background: #e3f2fd !important;
+        border: 2px solid #0d6efd !important;
+    }
+    
+    .calendar-cell.has-record {
+        background: #f8fff8;
+    }
+    
+    .day-number {
+        font-weight: bold;
+        font-size: 1rem;
+        color: #333;
+    }
+    
+    .attendance-badge {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 0.8rem;
+    }
+    
+    .time-info {
+        margin-top: 25px;
+        font-size: 0.7rem;
+        color: #666;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        document.getElementById('monthSelector').addEventListener('change', function() {
+            reloadCalendar();
+        });
+        
+        document.getElementById('yearSelector').addEventListener('change', function() {
+            reloadCalendar();
+        });
+        
+        function reloadCalendar() {
+            var month = document.getElementById('monthSelector').value;
+            var year = document.getElementById('yearSelector').value;
+            var userId = @(user?.DeliveryUserId ?? 0);
+            window.location.href = '@Url.Action("ByUser", "Attendance")' + '?userId=' + userId + '&month=' + month + '&year=' + year;
+        }
+    </script>
+}

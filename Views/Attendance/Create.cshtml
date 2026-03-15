@@ -1,0 +1,145 @@
+@model RestaurantFoodOrderingDeliverAdmin.Models.Attendance
+@{
+    ViewData["Title"] = "Add Attendance";
+    var users = ViewBag.DeliveryUsers as IEnumerable<RestaurantFoodOrderingDeliverAdmin.Models.DeliveryUser>;
+}
+
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Dashboard", "Home")">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Attendance")">Attendance</a></li>
+                    <li class="breadcrumb-item active">Add Attendance</li>
+                </ol>
+            </nav>
+            <h2 class="page-heading">
+                <i class="fas fa-plus-circle me-2"></i>Add Attendance Record
+            </h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="@Url.Action("Index", "Attendance")" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to List
+            </a>
+        </div>
+    </div>
+
+    <form method="post" action="@Url.Action("Create", "Attendance")">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-primary-custom text-white">
+                        <h5 class="mb-0"><i class="fas fa-calendar-check me-2"></i>Attendance Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Delivery User <span class="text-danger">*</span></label>
+                                <select class="form-select" name="DeliveryUserId" required>
+                                    <option value="">Select User</option>
+                                    @if (users != null)
+                                    {
+                                        @foreach (var user in users)
+                                        {
+                                            <option value="@user.DeliveryUserId">@user.FullName</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Date <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" name="AttendanceDate" value="@Model.AttendanceDate.ToString("yyyy-MM-dd")" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Check In Time</label>
+                                <input type="text" class="form-control" name="CheckInTime" value="@Model.CheckInTime" placeholder="09:00 AM">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Check Out Time</label>
+                                <input type="text" class="form-control" name="CheckOutTime" value="@Model.CheckOutTime" placeholder="06:00 PM">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Status <span class="text-danger">*</span></label>
+                                <select class="form-select" name="Status" required>
+                                    <option value="Present">Present</option>
+                                    <option value="Absent">Absent</option>
+                                    <option value="Late">Late</option>
+                                    <option value="Half Day">Half Day</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Intermediate Time Section -->
+                        <div class="card bg-light mb-3">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="fas fa-clock me-2"></i>Intermediate Break Time</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Intermediate Start Time</label>
+                                        <input type="text" class="form-control" name="IntermediateStartTime" placeholder="01:00 PM">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Intermediate End Time</label>
+                                        <input type="text" class="form-control" name="IntermediateEndTime" placeholder="02:00 PM">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Reasons Section -->
+                        <div class="card bg-light mb-3">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="fas fa-comment-alt me-2"></i>Reasons (if any)</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">In Time Reason</label>
+                                        <input type="text" class="form-control" name="InTimeReason" placeholder="Reason for late check-in...">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Out Time Reason</label>
+                                        <input type="text" class="form-control" name="OutTimeReason" placeholder="Reason for early check-out...">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Intermediate Start Reason</label>
+                                        <input type="text" class="form-control" name="IntermediateStartReason" placeholder="Reason for break start...">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Intermediate End Reason</label>
+                                        <input type="text" class="form-control" name="IntermediateEndReason" placeholder="Reason for break end...">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Notes</label>
+                            <textarea class="form-control" name="Notes" rows="3" placeholder="Any additional notes..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="card mt-3">
+                    <div class="card-body text-end">
+                        <a href="@Url.Action("Index", "Attendance")" class="btn btn-outline-secondary me-2">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary-custom">
+                            <i class="fas fa-save me-2"></i>Save Attendance
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

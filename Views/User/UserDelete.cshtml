@@ -1,0 +1,106 @@
+@model RestaurantFoodOrderingDeliverAdmin.Models.DeliveryUser
+@{
+    ViewData["Title"] = "Delete User - " + Model.FullName;
+}
+
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Dashboard", "Home")">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("DeliveryUsers", "User")">Delivery Users</a></li>
+                    <li class="breadcrumb-item active">Delete User</li>
+                </ol>
+            </nav>
+            <h2 class="page-heading text-danger">
+                <i class="fas fa-exclamation-triangle me-2"></i>Delete User
+            </h2>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="fas fa-trash me-2"></i>Confirm Deletion</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <strong>Warning!</strong> You are about to delete this user. This action cannot be undone.
+                    </div>
+
+                    <!-- User Info -->
+                    <div class="row mb-4">
+                        <div class="col-md-3 text-center">
+                            <i class="fas fa-user-circle fa-5x text-danger"></i>
+                        </div>
+                        <div class="col-md-9">
+                            <h4>@Model.FullName</h4>
+                            <p class="mb-1"><i class="fas fa-envelope me-2"></i>@Model.Email</p>
+                            <p class="mb-1"><i class="fas fa-phone me-2"></i>@Model.Phone</p>
+                            <p class="mb-1">
+                                <i class="fas fa-motorcycle me-2"></i>@(Model.VehicleType ?? "N/A") - @(Model.VehicleNumber ?? "N/A")
+                            </p>
+                            <hr>
+                            <div class="row">
+                                <div class="col-6">
+                                    <strong>@Model.TotalDeliveries</strong><br>
+                                    <small class="text-muted">Deliveries</small>
+                                </div>
+                                <div class="col-6">
+                                    <strong class="text-success">₹@Model.TotalEarnings.ToString("N0")</strong><br>
+                                    <small class="text-muted">Earnings</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-danger">
+                        <h6><i class="fas fa-info-circle me-2"></i>What will be deleted:</h6>
+                        <ul class="mb-0">
+                            <li>User profile and personal information</li>
+                            <li>All attendance records</li>
+                            <li>All leave requests</li>
+                            <li>All delivery history</li>
+                            <li>All earnings records</li>
+                        </ul>
+                    </div>
+
+                    <form method="post" action="@Url.Action("UserDeleteConfirm", "User")">
+                        <input type="hidden" name="DeliveryUserId" value="@Model.DeliveryUserId" />
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Type "<strong>DELETE</strong>" to confirm:</label>
+                            <input type="text" class="form-control" name="confirmText" id="confirmText" required>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="@Url.Action("DeliveryUsers", "User")" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-danger" id="deleteBtn" disabled>
+                                <i class="fas fa-trash me-2"></i>Delete User Permanently
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('confirmText').addEventListener('input', function() {
+            var deleteBtn = document.getElementById('deleteBtn');
+            if (this.value.toUpperCase() === 'DELETE') {
+                deleteBtn.disabled = false;
+            } else {
+                deleteBtn.disabled = true;
+            }
+        });
+    </script>
+}

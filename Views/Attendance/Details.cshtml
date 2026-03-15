@@ -1,0 +1,196 @@
+@model RestaurantFoodOrderingDeliverAdmin.Models.Attendance
+@{
+    ViewData["Title"] = "Attendance Details";
+}
+
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Dashboard", "Home")">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Attendance")">Attendance</a></li>
+                    <li class="breadcrumb-item active">Details</li>
+                </ol>
+            </nav>
+            <h2 class="page-heading">
+                <i class="fas fa-calendar-check me-2"></i>Attendance Details
+            </h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="@Url.Action("Edit", "Attendance", new { id = Model.AttendanceId })" class="btn btn-success me-2">
+                <i class="fas fa-edit me-2"></i>Edit
+            </a>
+            <a href="@Url.Action("Index", "Attendance")" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to List
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- User Info Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-circle fa-5x text-primary mb-3"></i>
+                    <h4>@(Model.DeliveryUser?.FullName ?? "Unknown User")</h4>
+                    <p class="text-muted mb-2">
+                        <i class="fas fa-envelope me-1"></i>@(Model.DeliveryUser?.Email ?? "N/A")
+                    </p>
+                    <p class="text-muted">
+                        <i class="fas fa-phone me-1"></i>@(Model.DeliveryUser?.Phone ?? "N/A")
+                    </p>
+                    <hr>
+                    @if (Model.Status == "Present")
+                    {
+                        <span class="badge bg-success fs-5">Present</span>
+                    }
+                    else if (Model.Status == "Late")
+                    {
+                        <span class="badge bg-warning fs-5">Late</span>
+                    }
+                    else if (Model.Status == "Half Day")
+                    {
+                        <span class="badge bg-info fs-5">Half Day</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger fs-5">Absent</span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance Details -->
+        <div class="col-md-8 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary-custom text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Attendance Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted">Attendance ID</label>
+                            <p class="fw-bold">#@Model.AttendanceId</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted">Date</label>
+                            <p class="fw-bold">
+                                <i class="fas fa-calendar me-2"></i>@Model.AttendanceDate.ToString("dddd, dd MMMM yyyy")
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted">Check In Time</label>
+                            <p class="fw-bold">
+                                <i class="fas fa-sign-in-alt text-success me-2"></i>@(Model.CheckInTime ?? "N/A")
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted">Check Out Time</label>
+                            <p class="fw-bold">
+                                <i class="fas fa-sign-out-alt text-danger me-2"></i>@(Model.CheckOutTime ?? "N/A")
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted">Intermediate Start Time</label>
+                            <p class="fw-bold">
+                                <i class="fas fa-pause-circle text-warning me-2"></i>@(Model.IntermediateStartTime ?? "N/A")
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted">Intermediate End Time</label>
+                            <p class="fw-bold">
+                                <i class="fas fa-play-circle text-info me-2"></i>@(Model.IntermediateEndTime ?? "N/A")
+                            </p>
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.Notes))
+                    {
+                        <div class="mt-3">
+                            <label class="text-muted">Notes</label>
+                            <div class="alert alert-info">
+                                <i class="fas fa-sticky-note me-2"></i>@Model.Notes
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reasons Section -->
+    @if (!string.IsNullOrEmpty(Model.InTimeReason) || !string.IsNullOrEmpty(Model.OutTimeReason) || 
+         !string.IsNullOrEmpty(Model.IntermediateStartReason) || !string.IsNullOrEmpty(Model.IntermediateEndReason))
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="fas fa-comment-alt me-2"></i>Reasons</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            @if (!string.IsNullOrEmpty(Model.InTimeReason))
+                            {
+                                <div class="col-md-6 mb-3">
+                                    <label class="text-muted">In Time Reason</label>
+                                    <div class="alert alert-secondary mb-0">
+                                        <i class="fas fa-sign-in-alt me-2"></i>@Model.InTimeReason
+                                    </div>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.OutTimeReason))
+                            {
+                                <div class="col-md-6 mb-3">
+                                    <label class="text-muted">Out Time Reason</label>
+                                    <div class="alert alert-secondary mb-0">
+                                        <i class="fas fa-sign-out-alt me-2"></i>@Model.OutTimeReason
+                                    </div>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.IntermediateStartReason))
+                            {
+                                <div class="col-md-6 mb-3">
+                                    <label class="text-muted">Intermediate Start Reason</label>
+                                    <div class="alert alert-secondary mb-0">
+                                        <i class="fas fa-pause-circle me-2"></i>@Model.IntermediateStartReason
+                                    </div>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.IntermediateEndReason))
+                            {
+                                <div class="col-md-6 mb-3">
+                                    <label class="text-muted">Intermediate End Reason</label>
+                                    <div class="alert alert-secondary mb-0">
+                                        <i class="fas fa-play-circle me-2"></i>@Model.IntermediateEndReason
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Action Buttons -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="mb-3"><i class="fas fa-cogs me-2"></i>Quick Actions</h5>
+                    <a href="@Url.Action("Edit", "Attendance", new { id = Model.AttendanceId })" class="btn btn-success me-2">
+                        <i class="fas fa-edit me-2"></i>Edit Record
+                    </a>
+                    <a href="@Url.Action("ByUser", "Attendance", new { userId = Model.DeliveryUserId })" class="btn btn-primary me-2">
+                        <i class="fas fa-user me-2"></i>View User's Attendance
+                    </a>
+                    <a href="@Url.Action("Delete", "Attendance", new { id = Model.AttendanceId })" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Delete Record
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

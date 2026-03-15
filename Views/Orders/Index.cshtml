@@ -1,0 +1,271 @@
+@model IEnumerable<RestaurantFoodOrderingDeliverAdmin.Models.DeliveryOrder>
+@{
+    ViewData["Title"] = "Orders Management";
+}
+
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="page-heading">
+                <i class="fas fa-shopping-cart me-2"></i>Orders Management
+            </h2>
+            <p class="text-muted">Manage and track all delivery orders</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="@Url.Action("AssignOrder", "Orders")" class="btn btn-success">
+                <i class="fas fa-user-plus me-2"></i>Assign Order
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-primary">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <div class="stat-content">
+                    <h6>Total Orders</h6>
+                    <h3>@ViewBag.TotalOrders</h3>
+                    <small class="text-muted">All time</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-warning">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <h6>Pending</h6>
+                    <h3>@ViewBag.PendingOrders</h3>
+                    <small class="text-muted">Awaiting delivery</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h6>Delivered</h6>
+                    <h3>@ViewBag.CompletedOrders</h3>
+                    <small class="text-muted">Completed</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-danger">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h6>Cancelled</h6>
+                    <h3>@ViewBag.CancelledOrders</h3>
+                    <small class="text-muted">Cancelled orders</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                <input type="text" class="form-control" id="searchInput" placeholder="Search orders...">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" id="statusFilter">
+                <option value="">All Status</option>
+                <option value="Pending">Pending</option>
+                <option value="Assigned">Assigned</option>
+                <option value="Picked Up">Picked Up</option>
+                <option value="Delivered">Delivered</option>
+                <option value="Cancelled">Cancelled</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="card">
+        <div class="card-header bg-primary-custom text-white">
+            <h5 class="mb-0"><i class="fas fa-list me-2"></i>All Orders</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="ordersTable">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Address</th>
+                            <th>Amount</th>
+                            <th>Delivery Partner</th>
+                            <th>Status</th>
+                            <th>Order Time</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @if(order.DeliveryOrderId > 0)
+                                    {
+                                        <strong>#@order.DeliveryOrderId</strong>
+                                        <br/> <small class="text-muted">Ref: #@order.OrderId</small>
+                                    }
+                                    else
+                                    {
+                                         <strong>#@order.OrderId</strong>
+                                         <span class="badge bg-warning ms-1" style="font-size:0.6rem">NEW</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div>
+                                        <strong>@(order.CustomerName ?? "N/A")</strong><br>
+                                        <small class="text-muted"><i class="fas fa-phone me-1"></i>@(order.CustomerPhone ?? "N/A")</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <small>@(order.DeliveryAddress?.Length > 30 ? order.DeliveryAddress.Substring(0, 30) + "..." : order.DeliveryAddress ?? "N/A")</small>
+                                </td>
+                                <td>
+                                    <strong>₹@order.TotalAmount.ToString("N2")</strong><br>
+                                    <small class="text-muted">Fee: ₹@order.DeliveryFee.ToString("N2")</small>
+                                </td>
+                                <td>
+                                    @if (order.DeliveryUser != null)
+                                    {
+                                        <span class="badge bg-info">@order.DeliveryUser.FullName</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Unassigned</span>
+                                    }
+                                </td>
+                                <td>
+                                    @switch (order.Status)
+                                    {
+                                        case "Pending":
+                                            <span class="badge bg-warning">Pending</span>
+                                            break;
+                                        case "Assigned":
+                                            <span class="badge bg-info">Assigned</span>
+                                            break;
+                                        case "Picked Up":
+                                            <span class="badge bg-primary">Picked Up</span>
+                                            break;
+                                        case "Delivered":
+                                            <span class="badge bg-success">Delivered</span>
+                                            break;
+                                        case "Cancelled":
+                                            <span class="badge bg-danger">Cancelled</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-secondary">@order.Status</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>
+                                    <small>@order.OrderTime.ToString("dd MMM yyyy")<br>@order.OrderTime.ToString("hh:mm tt")</small>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="@Url.Action("Details", "Orders", new { id = order.DeliveryOrderId })" 
+                                           class="btn btn-outline-primary" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="@Url.Action("Assignments", "Orders", new { orderId = order.DeliveryOrderId })" 
+                                           class="btn btn-outline-info" title="View Assignment">
+                                            <i class="fas fa-clipboard-list"></i>
+                                        </a>
+                                        <a href="@Url.Action("Edit", "Orders", new { id = order.DeliveryOrderId })" 
+                                           class="btn btn-outline-success" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="@Url.Action("Delete", "Orders", new { id = order.DeliveryOrderId })" 
+                                           class="btn btn-outline-danger" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    }
+    
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+    
+    .stat-icon.bg-primary { background: linear-gradient(135deg, #0d6efd, #0a58ca); }
+    .stat-icon.bg-success { background: linear-gradient(135deg, #198754, #146c43); }
+    .stat-icon.bg-warning { background: linear-gradient(135deg, #ffc107, #ffb300); }
+    .stat-icon.bg-danger { background: linear-gradient(135deg, #dc3545, #bb2d3b); }
+    
+    .stat-content h6 { font-size: 0.85rem; color: #666; margin-bottom: 5px; }
+    .stat-content h3 { font-size: 2rem; font-weight: bold; margin-bottom: 0; }
+</style>
+
+@section Scripts {
+    <script>
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            filterTable();
+        });
+        
+        document.getElementById('statusFilter').addEventListener('change', function() {
+            filterTable();
+        });
+        
+        function filterTable() {
+            var searchText = document.getElementById('searchInput').value.toLowerCase();
+            var statusFilter = document.getElementById('statusFilter').value.toLowerCase();
+            var rows = document.querySelectorAll('#ordersTable tbody tr');
+            
+            rows.forEach(function(row) {
+                var text = row.textContent.toLowerCase();
+                var statusCell = row.querySelector('td:nth-child(6)').textContent.toLowerCase();
+                
+                var matchesSearch = text.includes(searchText);
+                var matchesStatus = statusFilter === '' || statusCell.includes(statusFilter);
+                
+                row.style.display = (matchesSearch && matchesStatus) ? '' : 'none';
+            });
+        }
+    </script>
+}

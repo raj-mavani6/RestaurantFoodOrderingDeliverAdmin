@@ -1,0 +1,182 @@
+@model IEnumerable<RestaurantFoodOrderingDeliverAdmin.Models.DeliveryOrder>
+@{
+    ViewData["Title"] = "Orders Analytics";
+    var period = ViewBag.Period as string;
+
+    // Dynamic Grouping
+    var groupBy = period switch 
+    {
+        "month" => "month",
+        "year" => "year",
+        "week" => "week",
+        _ => "day"
+    };
+
+    // Helper for StartOfWeek
+    Func<DateTime, DateTime> getStartOfWeek = (dt) => 
+    {
+        int diff = (7 + (dt.DayOfWeek - DayOfWeek.Monday)) % 7;
+        return dt.AddDays(-1 * diff).Date;
+    };
+
+    // Line Chart Data: Orders over time
+    var ordersByDate = Model
+        .GroupBy(o => groupBy == "month" ? new DateTime(o.OrderTime.Year, o.OrderTime.Month, 1) :
+                      groupBy == "year" ? new DateTime(o.OrderTime.Year, 1, 1) : 
+                      groupBy == "week" ? getStartOfWeek(o.OrderTime) :
+                      o.OrderTime.Date)
+        .OrderBy(g => g.Key)
+        .Select(g => new { 
+            Date = groupBy == "month" ? g.Key.ToString("MMM yyyy") : 
+                   groupBy == "year" ? g.Key.ToString("yyyy") : 
+                   groupBy == "week" ? g.Key.ToString("dd MMM") + "-" + g.Key.AddDays(6).ToString("dd MMM") :
+                   g.Key.ToString("dd MMM"), 
+            Count = g.Count() 
+        })
+        .ToList();
+    var trendLabels = System.Text.Json.JsonSerializer.Serialize(ordersByDate.Select(x => x.Date));
+    var trendData = System.Text.Json.JsonSerializer.Serialize(ordersByDate.Select(x => x.Count));
+
+    // Doughnut Chart Data: Status Distribution
+    var statusCounts = Model
+        .GroupBy(o => o.Status)
+        .Select(g => new { Status = g.Key, Count = g.Count() })
+        .ToList();
+    var statusLabels = System.Text.Json.JsonSerializer.Serialize(statusCounts.Select(x => x.Status));
+    var statusData = System.Text.Json.JsonSerializer.Serialize(statusCounts.Select(x => x.Count));
+    
+    // Status Colors Mapping
+    var colors = statusCounts.Select(x => x.Status switch {
+        "Delivered" => "#198754",
+        "Assigned" => "#0dcaf0",
+        "Pending" => "#ffc107",
+        "Cancelled" => "#dc3545",
+        _ => "#6c757d"
+    }).ToList();
+    var statusColors = System.Text.Json.JsonSerializer.Serialize(colors);
+}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Report")">Reports</a></li>
+                    <li class="breadcrumb-item active">Orders</li>
+                </ol>
+            </nav>
+            <h2 class="page-heading"><i class="fas fa-shopping-cart me-2"></i>Order Analytics</h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <div class="btn-group period-filter">
+                <a href="@Url.Action("Orders", new { period = "week" })" class="btn btn-outline-primary @(period == "week" ? "active" : "")">Week</a>
+                <a href="@Url.Action("Orders", new { period = "month" })" class="btn btn-outline-primary @(period == "month" ? "active" : "")">Month</a>
+                <a href="@Url.Action("Orders", new { period = "year" })" class="btn btn-outline-primary @(period == "year" ? "active" : "")">Year</a>
+                <a href="@Url.Action("Orders", new { period = "all" })" class="btn btn-outline-primary @(period == "all" ? "active" : "")">All</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <!-- Trend Chart -->
+        <div class="col-lg-8 mb-4">
+            <div class="card chart-card h-100">
+                <div class="chart-header">
+                    <h5 class="chart-title">Order Volume Trend</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="orderTrendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Chart -->
+        <div class="col-lg-4 mb-4">
+            <div class="card chart-card h-100">
+                <div class="chart-header">
+                    <h5 class="chart-title">Status Breakdown</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="height: 250px;">
+                        <canvas id="orderStatusChart"></canvas>
+                    </div>
+                    <div class="mt-4">
+                        @foreach(var item in statusCounts)
+                        {
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">@item.Status</span>
+                                <span class="fw-bold">@item.Count</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Orders Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3">
+             <h5 class="card-title mb-0">Recent Orders</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">Order ID</th>
+                            <th>Customer</th>
+                            <th>Partner</th>
+                            <th>Amount</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model.Take(10))
+                        {
+                            <tr>
+                                <td class="ps-4 fw-bold">#@order.DeliveryOrderId</td>
+                                <td>@order.CustomerName</td>
+                                <td>@(order.DeliveryUser?.FullName ?? "Unassigned")</td>
+                                <td>₹@order.TotalAmount.ToString("N2")</td>
+                                <td>@order.OrderTime.ToString("dd MMM yy hh:mm tt")</td>
+                                <td>
+                                    <span class="badge @(order.Status == "Delivered" ? "bg-success" : 
+                                                        order.Status == "Cancelled" ? "bg-danger" : 
+                                                        order.Status == "Assigned" ? "bg-info" : "bg-warning")">
+                                        @order.Status
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script id="trendLabels" type="application/json">@Html.Raw(trendLabels)</script>
+    <script id="trendData" type="application/json">@Html.Raw(trendData)</script>
+    <script id="statusLabels" type="application/json">@Html.Raw(statusLabels)</script>
+    <script id="statusData" type="application/json">@Html.Raw(statusData)</script>
+    <script id="statusColors" type="application/json">@Html.Raw(statusColors)</script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var trendLabels = JSON.parse(document.getElementById('trendLabels').textContent);
+            var trendData = JSON.parse(document.getElementById('trendData').textContent);
+            
+            var statusLabels = JSON.parse(document.getElementById('statusLabels').textContent);
+            var statusData = JSON.parse(document.getElementById('statusData').textContent);
+            var statusColors = JSON.parse(document.getElementById('statusColors').textContent);
+
+            initLineChart('orderTrendChart', trendLabels, trendData, 'Orders', '#0d6efd');
+            initDoughnutChart('orderStatusChart', statusLabels, statusData, statusColors);
+        });
+    </script>
+}

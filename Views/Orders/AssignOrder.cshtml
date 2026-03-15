@@ -1,0 +1,168 @@
+@{
+    ViewData["Title"] = "Assign Order";
+    var users = ViewBag.DeliveryUsers as IEnumerable<RestaurantFoodOrderingDeliverAdmin.Models.DeliveryUser>;
+    var orderIds = ViewBag.UnassignedOrderIds as List<int>;
+}
+
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Dashboard", "Home")">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Orders")">Orders</a></li>
+                    <li class="breadcrumb-item active">Assign Order</li>
+                </ol>
+            </nav>
+            <h2 class="page-heading">
+                <i class="fas fa-user-plus me-2"></i>Assign Order to Delivery Partner
+            </h2>
+            <p class="text-muted">Select an order and assign it to a delivery partner</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="@Url.Action("Assignments", "Orders")" class="btn btn-info me-2">
+                <i class="fas fa-clipboard-list me-2"></i>View Assignments
+            </a>
+            <a href="@Url.Action("Index", "Orders")" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Orders
+            </a>
+        </div>
+    </div>
+
+    <form method="post" action="@Url.Action("AssignOrder", "Orders")">
+        <div class="row">
+            <!-- Select Order Card -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header bg-primary-custom text-white">
+                        <h5 class="mb-0"><i class="fas fa-shopping-cart me-2"></i>Select Order</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Choose Order ID <span class="text-danger">*</span></label>
+                            <select class="form-select form-select-lg" name="orderId" id="orderSelect" required>
+                                <option value="">-- Select Order --</option>
+                                @if (orderIds != null && orderIds.Count > 0)
+                                {
+                                    @foreach (var orderId in orderIds)
+                                    {
+                                        <option value="@orderId">#@orderId</option>
+                                    }
+                                }
+                                else
+                                {
+                                    <option value="" disabled>No unassigned orders available</option>
+                                }
+                            </select>
+                        </div>
+
+                        @if (orderIds != null && orderIds.Count > 0)
+                        {
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>@orderIds.Count</strong> unassigned orders available
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                No orders available to assign
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Select Delivery Partner Card -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-motorcycle me-2"></i>Select Delivery Partner</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Choose a Delivery Partner <span class="text-danger">*</span></label>
+                            <select class="form-select form-select-lg" name="deliveryUserId" required>
+                                <option value="">-- Select Delivery Partner --</option>
+                                @if (users != null)
+                                {
+                                    @foreach (var user in users)
+                                    {
+                                        <option value="@user.DeliveryUserId">
+                                            @user.FullName - @(user.Phone ?? "N/A")
+                                        </option>
+                                    }
+                                }
+                            </select>
+                        </div>
+
+                        <!-- Available Partners List -->
+                        <h6 class="fw-bold mb-3"><i class="fas fa-users me-2"></i>Available Partners</h6>
+                        <div class="row">
+                            @if (users != null)
+                            {
+                                @foreach (var user in users.Take(6))
+                                {
+                                    <div class="col-md-6 mb-3">
+                                        <div class="card partner-card" onclick="selectPartner(@user.DeliveryUserId)">
+                                            <div class="card-body d-flex align-items-center p-3">
+                                                <i class="fas fa-user-circle fa-2x text-primary me-3"></i>
+                                                <div>
+                                                    <h6 class="mb-0">@user.FullName</h6>
+                                                    <small class="text-muted">@(user.Phone ?? "N/A")</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <button type="submit" class="btn btn-success btn-lg px-5">
+                            <i class="fas fa-check me-2"></i>Assign Order to Delivery Partner
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<style>
+    .partner-card {
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+    
+    .partner-card:hover {
+        border-color: #0dcaf0;
+        box-shadow: 0 4px 15px rgba(13, 202, 240, 0.2);
+    }
+    
+    .partner-card.selected {
+        border-color: #0dcaf0;
+        background-color: #e7f9fd;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        function selectPartner(userId) {
+            document.querySelector('select[name="deliveryUserId"]').value = userId;
+            document.querySelectorAll('.partner-card').forEach(card => card.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+        }
+    </script>
+}

@@ -1,0 +1,229 @@
+@model RestaurantFoodOrderingDeliverAdmin.Models.DeliveryUser
+@{
+    var isNew = Model.DeliveryUserId == 0;
+    ViewData["Title"] = isNew ? "Add New User" : "Edit User - " + Model.FullName;
+}
+
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Dashboard", "Home")">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("DeliveryUsers", "User")">Delivery Users</a></li>
+                    <li class="breadcrumb-item active">@(isNew ? "Add New User" : "Edit User")</li>
+                </ol>
+            </nav>
+            <h2 class="page-heading">
+                <i class="fas fa-@(isNew ? "user-plus" : "user-edit") me-2"></i>@(isNew ? "Add New User" : "Edit User")
+            </h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="@Url.Action("DeliveryUsers", "User")" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to List
+            </a>
+        </div>
+    </div>
+
+    <form method="post" action="@Url.Action(isNew ? "UserCreate" : "UserUpdate", "User")">
+        <input type="hidden" name="DeliveryUserId" value="@Model.DeliveryUserId" />
+        
+        <div class="row">
+            <!-- Basic Information -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header bg-primary-custom text-white">
+                        <h5 class="mb-0"><i class="fas fa-user me-2"></i>Basic Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="FullName" value="@Model.FullName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" name="Email" value="@Model.Email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phone <span class="text-danger">*</span></label>
+                            <input type="tel" class="form-control" name="Phone" value="@Model.Phone" required>
+                        </div>
+                        @if (isNew)
+                        {
+                            <div class="mb-3">
+                                <label class="form-label">Password <span class="text-danger">*</span></label>
+                                <input type="password" class="form-control" name="Password" required>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Address Information -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-map-marker-alt me-2"></i>Address Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Permanent Address</label>
+                            <textarea class="form-control" name="PermanentAddress" rows="2">@Model.PermanentAddress</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Current Address</label>
+                            <textarea class="form-control" name="CurrentAddress" rows="2">@Model.CurrentAddress</textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">City</label>
+                                <input type="text" class="form-control" name="City" value="@Model.City">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">State</label>
+                                <input type="text" class="form-control" name="State" value="@Model.State">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Pincode</label>
+                            <input type="text" class="form-control" name="Pincode" value="@Model.Pincode">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Vehicle Information -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-motorcycle me-2"></i>Vehicle Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Vehicle Type</label>
+                            <select class="form-select" name="VehicleType">
+                                <option value="">Select Vehicle Type</option>
+                                @if (Model.VehicleType == "Motorcycle")
+                                {
+                                    <option value="Motorcycle" selected>Motorcycle</option>
+                                }
+                                else
+                                {
+                                    <option value="Motorcycle">Motorcycle</option>
+                                }
+                                @if (Model.VehicleType == "Scooter")
+                                {
+                                    <option value="Scooter" selected>Scooter</option>
+                                }
+                                else
+                                {
+                                    <option value="Scooter">Scooter</option>
+                                }
+                                @if (Model.VehicleType == "Bicycle")
+                                {
+                                    <option value="Bicycle" selected>Bicycle</option>
+                                }
+                                else
+                                {
+                                    <option value="Bicycle">Bicycle</option>
+                                }
+                                @if (Model.VehicleType == "Car")
+                                {
+                                    <option value="Car" selected>Car</option>
+                                }
+                                else
+                                {
+                                    <option value="Car">Car</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Vehicle Number</label>
+                            <input type="text" class="form-control" name="VehicleNumber" value="@Model.VehicleNumber" placeholder="e.g., MH-01-AB-1234">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Settings -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header bg-warning">
+                        <h5 class="mb-0"><i class="fas fa-cog me-2"></i>Account Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" name="Status">
+                                @if (Model.Status == "Active")
+                                {
+                                    <option value="Active" selected>Active</option>
+                                }
+                                else
+                                {
+                                    <option value="Active">Active</option>
+                                }
+                                @if (Model.Status == "Inactive")
+                                {
+                                    <option value="Inactive" selected>Inactive</option>
+                                }
+                                else
+                                {
+                                    <option value="Inactive">Inactive</option>
+                                }
+                                @if (Model.Status == "On Leave")
+                                {
+                                    <option value="On Leave" selected>On Leave</option>
+                                }
+                                else
+                                {
+                                    <option value="On Leave">On Leave</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input type="hidden" name="IsActive" value="false" />
+                                @if (Model.IsActive)
+                                {
+                                    <input class="form-check-input" type="checkbox" name="IsActive" value="true" id="isActive" checked>
+                                }
+                                else
+                                {
+                                    <input class="form-check-input" type="checkbox" name="IsActive" value="true" id="isActive">
+                                }
+                                <label class="form-check-label" for="isActive">Account Active</label>
+                            </div>
+                        </div>
+                        @if (!isNew)
+                        {
+                            <div class="mb-3">
+                                <label class="text-muted">Join Date</label>
+                                <p class="fw-bold">@Model.JoinDate.ToString("dd MMM yyyy")</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body text-end">
+                        <a href="@Url.Action("DeliveryUsers", "User")" class="btn btn-outline-secondary me-2">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary-custom">
+                            <i class="fas fa-save me-2"></i>@(isNew ? "Create User" : "Save Changes")
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

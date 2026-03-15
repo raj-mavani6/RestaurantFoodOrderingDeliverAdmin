@@ -1,0 +1,226 @@
+@model IEnumerable<RestaurantFoodOrderingDeliverAdmin.Models.DeliveryOrder>
+@{
+    ViewData["Title"] = "Order Assignments";
+    var filteredOrderId = ViewBag.FilteredOrderId as int?;
+}
+
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Dashboard", "Home")">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Orders")">Orders</a></li>
+                    <li class="breadcrumb-item active">Assignments</li>
+                </ol>
+            </nav>
+            <h2 class="page-heading">
+                <i class="fas fa-user-check me-2"></i>Order Assignments
+                @if (filteredOrderId.HasValue)
+                {
+                    <span class="badge bg-info ms-2">Order #@filteredOrderId</span>
+                }
+            </h2>
+            <p class="text-muted">
+                @if (filteredOrderId.HasValue)
+                {
+                    <text>Assignment details for Order #@filteredOrderId</text>
+                }
+                else
+                {
+                    <text>View all orders assigned to delivery partners</text>
+                }
+            </p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="@Url.Action("AssignOrder", "Orders")" class="btn btn-success me-2">
+                <i class="fas fa-user-plus me-2"></i>Assign Order
+            </a>
+            @if (filteredOrderId.HasValue)
+            {
+                <a href="@Url.Action("Assignments", "Orders")" class="btn btn-info me-2">
+                    <i class="fas fa-list me-2"></i>View All
+                </a>
+            }
+            <a href="@Url.Action("Index", "Orders")" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Orders
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-info">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <div class="stat-content">
+                    <h6>Total Assigned</h6>
+                    <h3>@Model.Count()</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-warning">
+                    <i class="fas fa-motorcycle"></i>
+                </div>
+                <div class="stat-content">
+                    <h6>In Progress</h6>
+                    <h3>@Model.Count(o => o.Status == "Assigned" || o.Status == "Picked Up")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-success">
+                    <i class="fas fa-check-double"></i>
+                </div>
+                <div class="stat-content">
+                    <h6>Delivered</h6>
+                    <h3>@Model.Count(o => o.Status == "Delivered")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-primary">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <h6>Partners Active</h6>
+                    <h3>@Model.Where(o => o.DeliveryUser != null).Select(o => o.DeliveryUserId).Distinct().Count()</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assignments Table -->
+    <div class="card">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="fas fa-list me-2"></i>All Assignments</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Delivery Partner</th>
+                            <th>Amount</th>
+                            <th>Assigned Time</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model)
+                        {
+                            <tr>
+                                <td><strong>#@order.DeliveryOrderId</strong></td>
+                                <td>
+                                    <strong>@(order.CustomerName ?? "N/A")</strong><br>
+                                    <small class="text-muted">@(order.CustomerPhone ?? "N/A")</small>
+                                </td>
+                                <td>
+                                    @if (order.DeliveryUser != null)
+                                    {
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-user-circle fa-2x text-primary me-2"></i>
+                                            <div>
+                                                <strong>@order.DeliveryUser.FullName</strong><br>
+                                                <small class="text-muted">@(order.DeliveryUser.Phone ?? "N/A")</small>
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">N/A</span>
+                                    }
+                                </td>
+                                <td>
+                                    <strong class="text-success">₹@order.TotalAmount.ToString("N2")</strong>
+                                </td>
+                                <td>
+                                    <small>
+                                        @order.AssignedTime.ToString("dd MMM yyyy")<br>
+                                        <span class="text-muted">@order.AssignedTime.ToString("hh:mm tt")</span>
+                                    </small>
+                                </td>
+                                <td>
+                                    @switch (order.Status)
+                                    {
+                                        case "Assigned":
+                                            <span class="badge bg-info">Assigned</span>
+                                            break;
+                                        case "Picked Up":
+                                            <span class="badge bg-primary">Picked Up</span>
+                                            break;
+                                        case "In Transit":
+                                            <span class="badge bg-warning">In Transit</span>
+                                            break;
+                                        case "Delivered":
+                                            <span class="badge bg-success">Delivered</span>
+                                            break;
+                                        case "Cancelled":
+                                            <span class="badge bg-danger">Cancelled</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-secondary">@order.Status</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="@Url.Action("Details", "Orders", new { id = order.DeliveryOrderId })" 
+                                           class="btn btn-outline-primary" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="@Url.Action("Edit", "Orders", new { id = order.DeliveryOrderId })" 
+                                           class="btn btn-outline-success" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+    
+    .stat-icon.bg-info { background: linear-gradient(135deg, #0dcaf0, #0aa2c0); }
+    .stat-icon.bg-primary { background: linear-gradient(135deg, #0d6efd, #0a58ca); }
+    .stat-icon.bg-success { background: linear-gradient(135deg, #198754, #146c43); }
+    .stat-icon.bg-warning { background: linear-gradient(135deg, #ffc107, #ffb300); }
+    
+    .stat-content h6 { font-size: 0.85rem; color: #666; margin-bottom: 5px; }
+    .stat-content h3 { font-size: 2rem; font-weight: bold; margin-bottom: 0; }
+</style>

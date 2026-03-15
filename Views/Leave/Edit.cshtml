@@ -1,0 +1,173 @@
+@model RestaurantFoodOrderingDeliverAdmin.Models.Leave
+@{
+    ViewData["Title"] = "Edit Leave Request";
+    var users = ViewBag.DeliveryUsers as IEnumerable<RestaurantFoodOrderingDeliverAdmin.Models.DeliveryUser>;
+}
+
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Dashboard", "Home")">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Leave")">Leave</a></li>
+                    <li class="breadcrumb-item active">Edit Leave #@Model.LeaveId</li>
+                </ol>
+            </nav>
+            <h2 class="page-heading">
+                <i class="fas fa-edit me-2"></i>Edit Leave #@Model.LeaveId
+            </h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="@Url.Action("Index", "Leave")" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to List
+            </a>
+        </div>
+    </div>
+
+    <form method="post" action="@Url.Action("Edit", "Leave")">
+        <input type="hidden" name="LeaveId" value="@Model.LeaveId" />
+        
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Delivery Partner -->
+                <div class="card mb-3">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-user me-2"></i>Delivery Partner</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Delivery Partner <span class="text-danger">*</span></label>
+                            <select class="form-select" name="DeliveryUserId" required>
+                                <option value="">-- Select Delivery Partner --</option>
+                                @if (users != null)
+                                {
+                                    @foreach (var user in users)
+                                    {
+                                        if (user.DeliveryUserId == Model.DeliveryUserId)
+                                        {
+                                            <option value="@user.DeliveryUserId" selected>@user.FullName - @(user.Phone ?? "N/A")</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@user.DeliveryUserId">@user.FullName - @(user.Phone ?? "N/A")</option>
+                                        }
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Leave Details -->
+                <div class="card mb-3">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-calendar-minus me-2"></i>Leave Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Leave Type <span class="text-danger">*</span></label>
+                                <select class="form-select" name="LeaveType" required>
+                                    @{
+                                        var types = new[] { "Sick", "Casual", "Emergency", "Other" };
+                                    }
+                                    @foreach (var type in types)
+                                    {
+                                        if (type == Model.LeaveType)
+                                        {
+                                            <option value="@type" selected>@type Leave</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@type">@type Leave</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Status</label>
+                                <select class="form-select" name="Status">
+                                    @{
+                                        var statuses = new[] { "Pending", "Approved", "Rejected" };
+                                    }
+                                    @foreach (var status in statuses)
+                                    {
+                                        if (status == Model.Status)
+                                        {
+                                            <option value="@status" selected>@status</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@status">@status</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">From Date <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" name="StartDate" value="@Model.StartDate.ToString("yyyy-MM-dd")" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">To Date <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" name="EndDate" value="@Model.EndDate.ToString("yyyy-MM-dd")" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reason -->
+                <div class="card mb-3">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="fas fa-sticky-note me-2"></i>Reason & Notes</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Reason <span class="text-danger">*</span></label>
+                            <textarea class="form-control" name="Reason" rows="3" required>@Model.Reason</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Admin Notes</label>
+                            <textarea class="form-control" name="AdminNotes" rows="2">@Model.AdminNotes</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Current Status</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        @switch (Model.Status)
+                        {
+                            case "Pending":
+                                <span class="badge bg-warning fs-4">Pending</span>
+                                break;
+                            case "Approved":
+                                <span class="badge bg-success fs-4">Approved</span>
+                                break;
+                            case "Rejected":
+                                <span class="badge bg-danger fs-4">Rejected</span>
+                                break;
+                        }
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-body">
+                        <button type="submit" class="btn btn-success w-100 mb-2">
+                            <i class="fas fa-save me-2"></i>Update Leave
+                        </button>
+                        <a href="@Url.Action("Index", "Leave")" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

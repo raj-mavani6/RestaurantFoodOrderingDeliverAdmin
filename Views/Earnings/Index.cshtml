@@ -1,0 +1,269 @@
+@model IEnumerable<RestaurantFoodOrderingDeliverAdmin.Models.DeliveryEarning>
+@{
+    ViewData["Title"] = "Earnings Management";
+}
+
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="page-heading">
+                <i class="fas fa-wallet me-2"></i>Earnings Management
+            </h2>
+            <p class="text-muted">Manage delivery partner earnings and payments</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="@Url.Action("Create", "Earnings")" class="btn btn-success">
+                <i class="fas fa-plus me-2"></i>Add Earning
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-2 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-success">
+                    <i class="fas fa-rupee-sign"></i>
+                </div>
+                <div class="stat-content">
+                    <h6>Total Earnings</h6>
+                    <h4>@Model.Count()</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-primary">
+                    <i class="fas fa-motorcycle"></i>
+                </div>
+                <div class="stat-content">
+                    <h6>Delivery Fees</h6>
+                    <h4>30</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-info">
+                    <i class="fas fa-hand-holding-usd"></i>
+                </div>
+                <div class="stat-content">
+                    <h6>Tips</h6>
+                    <h4>₹@(((decimal)ViewBag.TotalTips).ToString("N0"))</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-warning">
+                    <i class="fas fa-gift"></i>
+                </div>
+                <div class="stat-content">
+                    <h6>Bonus</h6>
+                    <h4>₹@(((decimal)ViewBag.TotalBonus).ToString("N0"))</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-danger">
+                    <i class="fas fa-minus-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h6>Deductions</h6>
+                    <h4>₹@(((decimal)ViewBag.TotalDeductions).ToString("N0"))</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-secondary">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <h6>Pending</h6>
+                    <h4>@ViewBag.PendingCount</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                <input type="text" class="form-control" id="searchInput" placeholder="Search earnings...">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" id="statusFilter">
+                <option value="">All Status</option>
+                <option value="Paid">Paid</option>
+                <option value="Pending">Pending</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Earnings Table -->
+    <div class="card">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0"><i class="fas fa-list me-2"></i>All Earnings</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="earningsTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Delivery Partner</th>
+                            <th>Delivery Fee</th>
+                            <th>Tip</th>
+                            <th>Bonus</th>
+                            <th>Deduction</th>
+                            <th>Total</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var earning in Model)
+                        {
+                            var total = earning.DeliveryFee + earning.TipAmount + earning.Bonus + earning.Incentive - earning.Deduction;
+                            <tr>
+                                <td><strong>#@earning.EarningId</strong></td>
+                                <td>
+                                    @if (earning.DeliveryUser != null)
+                                    {
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-user-circle fa-lg text-primary me-2"></i>
+                                            <div>
+                                                <strong>@earning.DeliveryUser.FullName</strong><br>
+                                                <small class="text-muted">@(earning.DeliveryUser.Phone ?? "N/A")</small>
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">N/A</span>
+                                    }
+                                </td>
+                                <td><span class="text-success">₹@earning.DeliveryFee.ToString("N2")</span></td>
+                                <td><span class="text-info">₹@earning.TipAmount.ToString("N2")</span></td>
+                                <td><span class="text-warning">₹@((earning.Bonus + earning.Incentive).ToString("N2"))</span></td>
+                                <td><span class="text-danger">-₹@earning.Deduction.ToString("N2")</span></td>
+                                <td><strong class="text-success fs-6">₹@total.ToString("N2")</strong></td>
+                                <td>
+                                    <small>@earning.EarningDate.ToString("dd MMM yyyy")</small>
+                                </td>
+                                <td>
+                                    @if (earning.PaymentStatus == "Paid")
+                                    {
+                                        <span class="badge bg-success">Paid</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning">Pending</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="@Url.Action("Details", "Earnings", new { id = earning.EarningId })" 
+                                           class="btn btn-outline-primary" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        @if (earning.PaymentStatus != "Paid")
+                                        {
+                                            <form method="post" action="@Url.Action("MarkAsPaid", "Earnings", new { id = earning.EarningId })" style="display:inline;">
+                                                <button type="submit" class="btn btn-outline-success" title="Mark as Paid">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                        <a href="@Url.Action("Edit", "Earnings", new { id = earning.EarningId })" 
+                                           class="btn btn-outline-info" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="@Url.Action("Delete", "Earnings", new { id = earning.EarningId })" 
+                                           class="btn btn-outline-danger" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 15px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    }
+    
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+    }
+    
+    .stat-icon.bg-primary { background: linear-gradient(135deg, #0d6efd, #0a58ca); }
+    .stat-icon.bg-success { background: linear-gradient(135deg, #198754, #146c43); }
+    .stat-icon.bg-info { background: linear-gradient(135deg, #0dcaf0, #0aa2c0); }
+    .stat-icon.bg-warning { background: linear-gradient(135deg, #ffc107, #ffb300); }
+    .stat-icon.bg-danger { background: linear-gradient(135deg, #dc3545, #bb2d3b); }
+    .stat-icon.bg-secondary { background: linear-gradient(135deg, #6c757d, #5c636a); }
+    
+    .stat-content h6 { font-size: 0.75rem; color: #666; margin-bottom: 3px; }
+    .stat-content h4 { font-size: 1.3rem; font-weight: bold; margin-bottom: 0; }
+</style>
+
+@section Scripts {
+    <script>
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            filterTable();
+        });
+        
+        document.getElementById('statusFilter').addEventListener('change', function() {
+            filterTable();
+        });
+        
+        function filterTable() {
+            var searchText = document.getElementById('searchInput').value.toLowerCase();
+            var statusFilter = document.getElementById('statusFilter').value.toLowerCase();
+            var rows = document.querySelectorAll('#earningsTable tbody tr');
+            
+            rows.forEach(function(row) {
+                var text = row.textContent.toLowerCase();
+                var statusCell = row.querySelector('td:nth-child(9)').textContent.toLowerCase();
+                
+                var matchesSearch = text.includes(searchText);
+                var matchesStatus = statusFilter === '' || statusCell.includes(statusFilter);
+                
+                row.style.display = (matchesSearch && matchesStatus) ? '' : 'none';
+            });
+        }
+    </script>
+}

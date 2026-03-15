@@ -1,0 +1,571 @@
+@model IEnumerable<RestaurantFoodOrderingDeliverAdmin.Models.DeliveryUser>
+
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="page-heading">
+                <i class="fas fa-chart-line me-2"></i>Admin Dashboard
+            </h2>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-primary">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <h6>Total Users</h6>
+                    <h3>@ViewBag.TotalUsers</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h6>Active Users</h6>
+                    <h3>@ViewBag.ActiveUsers</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-info">
+                    <i class="fas fa-box"></i>
+                </div>
+                <div class="stat-content">
+                    <h6>Total Deliveries</h6>
+                    <h3>@ViewBag.TotalDeliveries</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-warning">
+                    <i class="fas fa-hourglass-half"></i>
+                </div>
+                <div class="stat-content">
+                    <h6>Pending Leaves</h6>
+                    <h3>@ViewBag.PendingLeaves</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- On Leave & Inactive Users -->
+    <div class="row mb-4">
+        <!-- On Leave Users -->
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>On Leave Users</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Phone</th>
+                                    <th>City</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model != null)
+                                {
+                                    var onLeaveUsers = Model.Where(u => u.Status == "On Leave").ToList();
+                                    if (onLeaveUsers.Count > 0)
+                                    {
+                                        foreach (var user in onLeaveUsers)
+                                        {
+                                            <tr>
+                                                <td>@user.FullName</td>
+                                                <td>@(user.Phone ?? "N/A")</td>
+                                                <td>@(user.City ?? "N/A")</td>
+                                                <td>
+                                                    <a href="@Url.Action("Details", "Users", new { id = user.DeliveryUserId })" class="btn btn-sm btn-outline-primary">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted py-3">
+                                                <i class="fas fa-check-circle me-2"></i>No users on leave
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inactive Users -->
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="fas fa-user-slash me-2"></i>Inactive Users</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Phone</th>
+                                    <th>City</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model != null)
+                                {
+                                    var inactiveUsers = Model.Where(u => !u.IsActive || u.Status == "Inactive").ToList();
+                                    if (inactiveUsers.Count > 0)
+                                    {
+                                        foreach (var user in inactiveUsers)
+                                        {
+                                            <tr>
+                                                <td>@user.FullName</td>
+                                                <td>@(user.Phone ?? "N/A")</td>
+                                                <td>@(user.City ?? "N/A")</td>
+                                                <td>
+                                                    <a href="@Url.Action("Details", "Users", new { id = user.DeliveryUserId })" class="btn btn-sm btn-outline-primary">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted py-3">
+                                                <i class="fas fa-check-circle me-2"></i>All users are active
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Cards - Late & Absent Today -->
+    <div class="row mb-4">
+        <!-- Late Today -->
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Late Today</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Check In</th>
+                                    <th>Phone</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    var lateToday = ViewBag.LateToday as List<RestaurantFoodOrderingDeliverAdmin.Models.Attendance>;
+                                }
+                                @if (lateToday != null && lateToday.Count > 0)
+                                {
+                                    foreach (var att in lateToday)
+                                    {
+                                        <tr>
+                                            <td>@(att.DeliveryUser?.FullName ?? "N/A")</td>
+                                            <td>@(att.CheckInTime ?? "N/A")</td>
+                                            <td>@(att.DeliveryUser?.Phone ?? "N/A")</td>
+                                            <td>
+                                                <a href="@Url.Action("Details", "Users", new { id = att.DeliveryUserId })" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-3">
+                                            <i class="fas fa-check-circle me-2"></i>No late arrivals today
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Absent Today -->
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-user-times me-2"></i>Absent Today</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Phone</th>
+                                    <th>City</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    var absentToday = ViewBag.AbsentToday as List<RestaurantFoodOrderingDeliverAdmin.Models.Attendance>;
+                                }
+                                @if (absentToday != null && absentToday.Count > 0)
+                                {
+                                    foreach (var att in absentToday)
+                                    {
+                                        <tr>
+                                            <td>@(att.DeliveryUser?.FullName ?? "N/A")</td>
+                                            <td>@(att.DeliveryUser?.Phone ?? "N/A")</td>
+                                            <td>@(att.DeliveryUser?.City ?? "N/A")</td>
+                                            <td>
+                                                <a href="@Url.Action("Details", "Users", new { id = att.DeliveryUserId })" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-3">
+                                            <i class="fas fa-check-circle me-2"></i>No absences today
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders Cards - Pending & Cancelled -->
+    <div class="row mb-4">
+        <!-- Pending Orders -->
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-hourglass-half me-2"></i>Pending Orders</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Partner</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    var pendingOrders = ViewBag.PendingOrders as List<RestaurantFoodOrderingDeliverAdmin.Models.DeliveryOrder>;
+                                }
+                                @if (pendingOrders != null && pendingOrders.Count > 0)
+                                {
+                                    foreach (var order in pendingOrders)
+                                    {
+                                        <tr>
+                                            <td><strong>#@order.OrderId</strong></td>
+                                            <td>@(order.DeliveryUser?.FullName ?? "Unassigned")</td>
+                                            <td><span class="badge bg-warning">@order.Status</span></td>
+                                            <td>
+                                                <a href="@Url.Action("Assignments", "Orders", new { orderId = order.OrderId })" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-3">
+                                            <i class="fas fa-check-circle me-2"></i>No pending orders
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cancelled Orders -->
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fas fa-ban me-2"></i>Cancelled Orders</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Partner</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    var cancelledOrders = ViewBag.CancelledOrders as List<RestaurantFoodOrderingDeliverAdmin.Models.DeliveryOrder>;
+                                }
+                                @if (cancelledOrders != null && cancelledOrders.Count > 0)
+                                {
+                                    foreach (var order in cancelledOrders)
+                                    {
+                                        <tr>
+                                            <td><strong>#@order.OrderId</strong></td>
+                                            <td>@(order.DeliveryUser?.FullName ?? "N/A")</td>
+                                            <td><span class="badge bg-danger">@order.Status</span></td>
+                                            <td>
+                                                <a href="@Url.Action("Assignments", "Orders", new { orderId = order.OrderId })" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-3">
+                                            <i class="fas fa-check-circle me-2"></i>No cancelled orders
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Earnings Card - Pending Earnings -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-wallet me-2"></i>Pending Earnings</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Partner</th>
+                                    <th>Delivery Fee</th>
+                                    <th>Tip</th>
+                                    <th>Total</th>
+                                    <th>Date</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    var pendingEarnings = ViewBag.PendingEarnings as List<RestaurantFoodOrderingDeliverAdmin.Models.DeliveryEarning>;
+                                }
+                                @if (pendingEarnings != null && pendingEarnings.Count > 0)
+                                {
+                                    foreach (var earning in pendingEarnings)
+                                    {
+                                        var total = earning.DeliveryFee + earning.TipAmount + earning.Bonus + earning.Incentive - earning.Deduction;
+                                        <tr>
+                                            <td><strong>#@earning.EarningId</strong></td>
+                                            <td>@(earning.DeliveryUser?.FullName ?? "N/A")</td>
+                                            <td class="text-success">₹@earning.DeliveryFee.ToString("N2")</td>
+                                            <td class="text-info">₹@earning.TipAmount.ToString("N2")</td>
+                                            <td><strong class="text-success">₹@total.ToString("N2")</strong></td>
+                                            <td>@earning.EarningDate.ToString("dd MMM")</td>
+                                            <td>
+                                                <a href="@Url.Action("Details", "Earnings", new { id = earning.EarningId })" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <form method="post" action="@Url.Action("MarkAsPaid", "Earnings", new { id = earning.EarningId })" style="display:inline;">
+                                                    <button type="submit" class="btn btn-sm btn-outline-success" title="Mark as Paid">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted py-3">
+                                            <i class="fas fa-check-circle me-2"></i>No pending earnings
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leave Cards - Pending & Rejected -->
+    <div class="row mb-4">
+        <!-- Pending Leaves -->
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-hourglass-half me-2"></i>Pending Leaves</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Partner</th>
+                                    <th>Type</th>
+                                    <th>From</th>
+                                    <th>To</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    var pendingLeavesList = ViewBag.PendingLeavesList as List<RestaurantFoodOrderingDeliverAdmin.Models.Leave>;
+                                }
+                                @if (pendingLeavesList != null && pendingLeavesList.Count > 0)
+                                {
+                                    foreach (var leave in pendingLeavesList)
+                                    {
+                                        <tr>
+                                            <td>@(leave.DeliveryUser?.FullName ?? "N/A")</td>
+                                            <td><span class="badge bg-info">@leave.LeaveType</span></td>
+                                            <td>@leave.StartDate.ToString("dd MMM")</td>
+                                            <td>@leave.EndDate.ToString("dd MMM")</td>
+                                            <td>
+                                                <form method="post" action="@Url.Action("Approve", "Leave", new { id = leave.LeaveId })" style="display:inline;">
+                                                    <button type="submit" class="btn btn-sm btn-outline-success" title="Approve">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                </form>
+                                                <form method="post" action="@Url.Action("Reject", "Leave", new { id = leave.LeaveId })" style="display:inline;">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Reject">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted py-3">
+                                            <i class="fas fa-check-circle me-2"></i>No pending leaves
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rejected Leaves -->
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="fas fa-times-circle me-2"></i>Rejected Leaves</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Partner</th>
+                                    <th>Type</th>
+                                    <th>From</th>
+                                    <th>To</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    var rejectedLeaves = ViewBag.RejectedLeaves as List<RestaurantFoodOrderingDeliverAdmin.Models.Leave>;
+                                }
+                                @if (rejectedLeaves != null && rejectedLeaves.Count > 0)
+                                {
+                                    foreach (var leave in rejectedLeaves)
+                                    {
+                                        <tr>
+                                            <td>@(leave.DeliveryUser?.FullName ?? "N/A")</td>
+                                            <td><span class="badge bg-info">@leave.LeaveType</span></td>
+                                            <td>@leave.StartDate.ToString("dd MMM")</td>
+                                            <td>@leave.EndDate.ToString("dd MMM")</td>
+                                            <td>
+                                                <a href="@Url.Action("Details", "Leave", new { id = leave.LeaveId })" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted py-3">
+                                            <i class="fas fa-check-circle me-2"></i>No rejected leaves
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

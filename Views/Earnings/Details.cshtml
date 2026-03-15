@@ -1,0 +1,160 @@
+@model RestaurantFoodOrderingDeliverAdmin.Models.DeliveryEarning
+@{
+    ViewData["Title"] = "Earning Details";
+    var total = Model.DeliveryFee + Model.TipAmount + Model.Bonus + Model.Incentive - Model.Deduction;
+}
+
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Dashboard", "Home")">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Earnings")">Earnings</a></li>
+                    <li class="breadcrumb-item active">Earning #@Model.EarningId</li>
+                </ol>
+            </nav>
+            <h2 class="page-heading">
+                <i class="fas fa-wallet me-2"></i>Earning Details #@Model.EarningId
+            </h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="@Url.Action("Edit", "Earnings", new { id = Model.EarningId })" class="btn btn-success me-2">
+                <i class="fas fa-edit me-2"></i>Edit
+            </a>
+            <a href="@Url.Action("Index", "Earnings")" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to List
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Earning Info -->
+        <div class="col-md-8 mb-4">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Earning Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted">Earning ID</label>
+                            <p class="fw-bold fs-5">#@Model.EarningId</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted">Earning Date</label>
+                            <p class="fw-bold"><i class="fas fa-calendar me-2"></i>@Model.EarningDate.ToString("dd MMM yyyy, hh:mm tt")</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted">Earning Type</label>
+                            <p class="fw-bold"><i class="fas fa-tag me-2"></i>@(Model.EarningType ?? "Delivery")</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted">Payment Status</label>
+                            <p>
+                                @if (Model.PaymentStatus == "Paid")
+                                {
+                                    <span class="badge bg-success fs-6">Paid</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning fs-6">Pending</span>
+                                }
+                            </p>
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.Description))
+                        {
+                            <div class="col-12 mb-3">
+                                <label class="text-muted">Description</label>
+                                <p class="fw-bold">@Model.Description</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Earning Breakdown -->
+            <div class="card mt-3">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-rupee-sign me-2"></i>Earning Breakdown</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered">
+                        <tr>
+                            <td>Delivery Fee</td>
+                            <td class="text-end text-success fw-bold">₹@Model.DeliveryFee.ToString("N2")</td>
+                        </tr>
+                        <tr>
+                            <td>Tip Amount</td>
+                            <td class="text-end text-info fw-bold">₹@Model.TipAmount.ToString("N2")</td>
+                        </tr>
+                        <tr>
+                            <td>Bonus</td>
+                            <td class="text-end text-warning fw-bold">₹@Model.Bonus.ToString("N2")</td>
+                        </tr>
+                        <tr>
+                            <td>Incentive</td>
+                            <td class="text-end text-warning fw-bold">₹@Model.Incentive.ToString("N2")</td>
+                        </tr>
+                        <tr class="table-danger">
+                            <td>Deduction</td>
+                            <td class="text-end text-danger fw-bold">-₹@Model.Deduction.ToString("N2")</td>
+                        </tr>
+                        <tr class="table-success">
+                            <td class="fw-bold fs-5">Total Earning</td>
+                            <td class="text-end text-success fw-bold fs-4">₹@total.ToString("N2")</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <!-- Delivery Partner -->
+            <div class="card mb-3">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-user me-2"></i>Delivery Partner</h5>
+                </div>
+                <div class="card-body text-center">
+                    @if (Model.DeliveryUser != null)
+                    {
+                        <i class="fas fa-user-circle fa-4x text-primary mb-2"></i>
+                        <h5>@Model.DeliveryUser.FullName</h5>
+                        <p class="text-muted mb-1"><i class="fas fa-phone me-1"></i>@(Model.DeliveryUser.Phone ?? "N/A")</p>
+                        <p class="text-muted"><i class="fas fa-envelope me-1"></i>@(Model.DeliveryUser.Email ?? "N/A")</p>
+                    }
+                    else
+                    {
+                        <i class="fas fa-user-times fa-4x text-muted mb-2"></i>
+                        <h5 class="text-muted">Partner Not Found</h5>
+                    }
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.PaymentStatus != "Paid")
+                    {
+                        <form method="post" action="@Url.Action("MarkAsPaid", "Earnings", new { id = Model.EarningId })">
+                            <button type="submit" class="btn btn-success w-100 mb-2">
+                                <i class="fas fa-check me-2"></i>Mark as Paid
+                            </button>
+                        </form>
+                    }
+                    <a href="@Url.Action("Edit", "Earnings", new { id = Model.EarningId })" class="btn btn-info w-100 mb-2">
+                        <i class="fas fa-edit me-2"></i>Edit Earning
+                    </a>
+                    <a href="@Url.Action("Delete", "Earnings", new { id = Model.EarningId })" class="btn btn-danger w-100">
+                        <i class="fas fa-trash me-2"></i>Delete Earning
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

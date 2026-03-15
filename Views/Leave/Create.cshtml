@@ -1,0 +1,123 @@
+@{
+    ViewData["Title"] = "Create Leave Request";
+    var users = ViewBag.DeliveryUsers as IEnumerable<RestaurantFoodOrderingDeliverAdmin.Models.DeliveryUser>;
+}
+
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Dashboard", "Home")">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Leave")">Leave</a></li>
+                    <li class="breadcrumb-item active">Create Request</li>
+                </ol>
+            </nav>
+            <h2 class="page-heading">
+                <i class="fas fa-plus-circle me-2"></i>Create Leave Request
+            </h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="@Url.Action("Index", "Leave")" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to List
+            </a>
+        </div>
+    </div>
+
+    <form method="post" action="@Url.Action("Create", "Leave")">
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Delivery Partner -->
+                <div class="card mb-3">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-user me-2"></i>Select Delivery Partner</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Delivery Partner <span class="text-danger">*</span></label>
+                            <select class="form-select" name="DeliveryUserId" required>
+                                <option value="">-- Select Delivery Partner --</option>
+                                @if (users != null)
+                                {
+                                    @foreach (var user in users)
+                                    {
+                                        <option value="@user.DeliveryUserId">@user.FullName - @(user.Phone ?? "N/A")</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Leave Details -->
+                <div class="card mb-3">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-calendar-minus me-2"></i>Leave Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Leave Type <span class="text-danger">*</span></label>
+                                <select class="form-select" name="LeaveType" required>
+                                    <option value="">-- Select Type --</option>
+                                    <option value="Sick">Sick Leave</option>
+                                    <option value="Casual">Casual Leave</option>
+                                    <option value="Emergency">Emergency</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Status</label>
+                                <select class="form-select" name="Status">
+                                    <option value="Pending" selected>Pending</option>
+                                    <option value="Approved">Approved</option>
+                                    <option value="Rejected">Rejected</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">From Date <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" name="StartDate" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">To Date <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" name="EndDate" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reason -->
+                <div class="card mb-3">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="fas fa-sticky-note me-2"></i>Reason & Notes</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Reason <span class="text-danger">*</span></label>
+                            <textarea class="form-control" name="Reason" rows="3" placeholder="Enter reason for leave..." required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Admin Notes</label>
+                            <textarea class="form-control" name="AdminNotes" rows="2" placeholder="Optional admin notes..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <button type="submit" class="btn btn-success w-100 mb-2">
+                            <i class="fas fa-save me-2"></i>Create Leave Request
+                        </button>
+                        <a href="@Url.Action("Index", "Leave")" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

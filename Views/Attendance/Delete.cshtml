@@ -1,0 +1,88 @@
+@model RestaurantFoodOrderingDeliverAdmin.Models.Attendance
+@{
+    ViewData["Title"] = "Delete Attendance";
+}
+
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Dashboard", "Home")">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Attendance")">Attendance</a></li>
+                    <li class="breadcrumb-item active">Delete</li>
+                </ol>
+            </nav>
+            <h2 class="page-heading text-danger">
+                <i class="fas fa-exclamation-triangle me-2"></i>Delete Attendance Record
+            </h2>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="fas fa-trash me-2"></i>Confirm Deletion</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <strong>Warning!</strong> You are about to delete this attendance record. This action cannot be undone.
+                    </div>
+
+                    <!-- Record Info -->
+                    <div class="row mb-4">
+                        <div class="col-md-3 text-center">
+                            <i class="fas fa-calendar-times fa-5x text-danger"></i>
+                        </div>
+                        <div class="col-md-9">
+                            <h4>Attendance #@Model.AttendanceId</h4>
+                            <p class="mb-1">
+                                <i class="fas fa-user me-2"></i>
+                                <strong>@(Model.DeliveryUser?.FullName ?? "Unknown User")</strong>
+                            </p>
+                            <p class="mb-1">
+                                <i class="fas fa-calendar me-2"></i>
+                                @Model.AttendanceDate.ToString("dddd, dd MMMM yyyy")
+                            </p>
+                            <p class="mb-1">
+                                <i class="fas fa-clock me-2"></i>
+                                @(Model.CheckInTime ?? "N/A") - @(Model.CheckOutTime ?? "N/A")
+                            </p>
+                            <hr>
+                            <div class="row">
+                                <div class="col-12">
+                                    @if (Model.Status == "Present")
+                                    {
+                                        <span class="badge bg-success">Present</span>
+                                    }
+                                    else if (Model.Status == "Late")
+                                    {
+                                        <span class="badge bg-warning">Late</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Absent</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="post" action="@Url.Action("Delete", "Attendance", new { id = Model.AttendanceId })">
+                        <div class="d-flex justify-content-between">
+                            <a href="@Url.Action("Index", "Attendance")" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash me-2"></i>Delete Permanently
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

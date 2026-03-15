@@ -1,0 +1,198 @@
+@model RestaurantFoodOrderingDeliverAdmin.Models.Leave
+@{
+    ViewData["Title"] = "Leave Details";
+    var days = (Model.EndDate - Model.StartDate).Days + 1;
+}
+
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Dashboard", "Home")">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Leave")">Leave</a></li>
+                    <li class="breadcrumb-item active">Leave #@Model.LeaveId</li>
+                </ol>
+            </nav>
+            <h2 class="page-heading">
+                <i class="fas fa-calendar-minus me-2"></i>Leave Details #@Model.LeaveId
+            </h2>
+        </div>
+        <div class="col-md-4 text-end">
+            @if (Model.Status == "Pending")
+            {
+                <form method="post" action="@Url.Action("Approve", "Leave", new { id = Model.LeaveId })" style="display:inline;">
+                    <button type="submit" class="btn btn-success me-2">
+                        <i class="fas fa-check me-2"></i>Approve
+                    </button>
+                </form>
+                <form method="post" action="@Url.Action("Reject", "Leave", new { id = Model.LeaveId })" style="display:inline;">
+                    <button type="submit" class="btn btn-danger me-2">
+                        <i class="fas fa-times me-2"></i>Reject
+                    </button>
+                </form>
+            }
+            <a href="@Url.Action("Index", "Leave")" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to List
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Leave Info -->
+        <div class="col-md-8 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Leave Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted">Leave ID</label>
+                            <p class="fw-bold fs-5">#@Model.LeaveId</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted">Status</label>
+                            <p>
+                                @switch (Model.Status)
+                                {
+                                    case "Pending":
+                                        <span class="badge bg-warning fs-6">Pending</span>
+                                        break;
+                                    case "Approved":
+                                        <span class="badge bg-success fs-6">Approved</span>
+                                        break;
+                                    case "Rejected":
+                                        <span class="badge bg-danger fs-6">Rejected</span>
+                                        break;
+                                }
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted">Leave Type</label>
+                            <p class="fw-bold">
+                                @switch (Model.LeaveType)
+                                {
+                                    case "Sick":
+                                        <span class="badge bg-danger">Sick Leave</span>
+                                        break;
+                                    case "Casual":
+                                        <span class="badge bg-info">Casual Leave</span>
+                                        break;
+                                    case "Emergency":
+                                        <span class="badge bg-warning">Emergency</span>
+                                        break;
+                                    default:
+                                        <span class="badge bg-secondary">@Model.LeaveType</span>
+                                        break;
+                                }
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted">Applied On</label>
+                            <p class="fw-bold"><i class="fas fa-calendar me-2"></i>@Model.AppliedDate.ToString("dd MMM yyyy, hh:mm tt")</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leave Duration -->
+            <div class="card mt-3">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-calendar-week me-2"></i>Leave Duration</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <h6 class="text-muted">From</h6>
+                            <h4><i class="fas fa-calendar-day me-2"></i>@Model.StartDate.ToString("dd MMM yyyy")</h4>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-muted">To</h6>
+                            <h4><i class="fas fa-calendar-day me-2"></i>@Model.EndDate.ToString("dd MMM yyyy")</h4>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-muted">Total Days</h6>
+                            <h4 class="text-primary"><strong>@days Day(s)</strong></h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reason -->
+            <div class="card mt-3">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-sticky-note me-2"></i>Reason</h5>
+                </div>
+                <div class="card-body">
+                    <p>@(Model.Reason ?? "No reason provided")</p>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.AdminNotes))
+            {
+                <div class="card mt-3">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="fas fa-comment-alt me-2"></i>Admin Notes</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>@Model.AdminNotes</p>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <!-- Delivery Partner -->
+            <div class="card mb-3">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-user me-2"></i>Delivery Partner</h5>
+                </div>
+                <div class="card-body text-center">
+                    @if (Model.DeliveryUser != null)
+                    {
+                        <i class="fas fa-user-circle fa-4x text-primary mb-2"></i>
+                        <h5>@Model.DeliveryUser.FullName</h5>
+                        <p class="text-muted mb-1"><i class="fas fa-phone me-1"></i>@(Model.DeliveryUser.Phone ?? "N/A")</p>
+                        <p class="text-muted"><i class="fas fa-envelope me-1"></i>@(Model.DeliveryUser.Email ?? "N/A")</p>
+                    }
+                    else
+                    {
+                        <i class="fas fa-user-times fa-4x text-muted mb-2"></i>
+                        <h5 class="text-muted">Partner Not Found</h5>
+                    }
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Status == "Pending")
+                    {
+                        <form method="post" action="@Url.Action("Approve", "Leave", new { id = Model.LeaveId })">
+                            <button type="submit" class="btn btn-success w-100 mb-2">
+                                <i class="fas fa-check me-2"></i>Approve Leave
+                            </button>
+                        </form>
+                        <form method="post" action="@Url.Action("Reject", "Leave", new { id = Model.LeaveId })">
+                            <button type="submit" class="btn btn-danger w-100 mb-2">
+                                <i class="fas fa-times me-2"></i>Reject Leave
+                            </button>
+                        </form>
+                    }
+                    <a href="@Url.Action("Edit", "Leave", new { id = Model.LeaveId })" class="btn btn-info w-100 mb-2">
+                        <i class="fas fa-edit me-2"></i>Edit Leave
+                    </a>
+                    <a href="@Url.Action("Delete", "Leave", new { id = Model.LeaveId })" class="btn btn-outline-danger w-100">
+                        <i class="fas fa-trash me-2"></i>Delete Leave
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

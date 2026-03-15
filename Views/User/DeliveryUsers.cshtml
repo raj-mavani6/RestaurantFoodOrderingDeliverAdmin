@@ -1,0 +1,302 @@
+@model RestaurantFoodOrderingDeliverAdmin.Models.ViewModels.DeliveryUsersListViewModel
+@{
+    ViewData["Title"] = "Delivery Users";
+}
+
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="page-heading">
+                <i class="fas fa-users me-2"></i>Delivery Users
+            </h2>
+            <p class="text-muted">Manage all delivery partners</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="@Url.Action("UserEdit", "User", new { id = 0 })" class="btn btn-primary-custom">
+                <i class="fas fa-plus me-2"></i>Add New User
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-primary">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <h6>Total Users</h6>
+                    <h3>@Model.TotalUsers</h3>
+                    <small class="text-muted">All delivery partners</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h6>Active Users</h6>
+                    <h3>@Model.ActiveUsers</h3>
+                    <small class="text-muted">Currently active</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-warning">
+                    <i class="fas fa-pause-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h6>On Leave</h6>
+                    <h3>@Model.OnLeaveUsers</h3>
+                    <small class="text-muted">Currently on leave</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-danger">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h6>Inactive</h6>
+                    <h3>@Model.InactiveUsers</h3>
+                    <small class="text-muted">Deactivated accounts</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                <input type="text" class="form-control" id="searchInput" placeholder="Search users by name, email or phone...">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" id="statusFilter">
+                <option value="">All Status</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+                <option value="On Leave">On Leave</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" id="vehicleFilter">
+                <option value="">All Vehicles</option>
+                <option value="Motorcycle">Motorcycle</option>
+                <option value="Scooter">Scooter</option>
+                <option value="Bicycle">Bicycle</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="card">
+        <div class="card-header bg-primary-custom text-white">
+            <h5 class="mb-0"><i class="fas fa-list me-2"></i>All Delivery Partners</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="usersTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Contact</th>
+                            <th>Vehicle</th>
+                            <th>Status</th>
+                            <th>Deliveries</th>
+                            <th>Earnings</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model.Users)
+                        {
+                            <tr>
+                                <td><strong>#@user.DeliveryUserId</strong></td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="user-avatar me-2">
+                                            <i class="fas fa-user-circle fa-2x text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <strong>@user.FullName</strong>
+                                            <br>
+                                            <small class="text-muted">@user.Email</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <i class="fas fa-phone me-1"></i>@user.Phone
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">
+                                        @(user.VehicleType ?? "N/A")
+                                    </span>
+                                    <br>
+                                    <small class="text-muted">@(user.VehicleNumber ?? "N/A")</small>
+                                </td>
+                                <td>
+                                    @if (user.Status == "Active" && user.IsActive)
+                                    {
+                                        <span class="badge bg-success">Active</span>
+                                    }
+                                    else if (user.Status == "On Leave")
+                                    {
+                                        <span class="badge bg-warning">On Leave</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Inactive</span>
+                                    }
+                                </td>
+                                <td>
+                                    <strong>@user.CompletedDeliveries</strong>
+                                    <br>
+                                    <small class="text-muted">orders</small>
+                                </td>
+                                <td>
+                                    <strong class="text-success">₹@user.TotalEarnings.ToString("N0")</strong>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="@Url.Action("UserDetails", "User", new { id = user.DeliveryUserId })" 
+                                           class="btn btn-outline-primary" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="@Url.Action("UserEdit", "User", new { id = user.DeliveryUserId })" 
+                                           class="btn btn-outline-success" title="Edit User">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        @if (user.IsActive)
+                                        {
+                                            <form action="@Url.Action("DeactivateUser", "User")" method="post" style="display: inline;">
+                                                <input type="hidden" name="id" value="@user.DeliveryUserId" />
+                                                <button type="submit" class="btn btn-outline-warning" title="Deactivate User">
+                                                    <i class="fas fa-ban"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <form action="@Url.Action("ActivateUser", "User")" method="post" style="display: inline;">
+                                                <input type="hidden" name="id" value="@user.DeliveryUserId" />
+                                                <button type="submit" class="btn btn-outline-success" title="Activate User">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                        <a href="@Url.Action("UserDelete", "User", new { id = user.DeliveryUserId })" 
+                                           class="btn btn-outline-danger" title="Delete User">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    }
+    
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+    
+    .stat-icon.bg-primary {
+        background: linear-gradient(135deg, #0d6efd, #0a58ca);
+    }
+    
+    .stat-icon.bg-success {
+        background: linear-gradient(135deg, #198754, #146c43);
+    }
+    
+    .stat-icon.bg-warning {
+        background: linear-gradient(135deg, #ffc107, #ffb300);
+    }
+    
+    .stat-icon.bg-danger {
+        background: linear-gradient(135deg, #dc3545, #bb2d3b);
+    }
+    
+    .stat-content h6 {
+        font-size: 0.85rem;
+        color: #666;
+        margin-bottom: 5px;
+    }
+    
+    .stat-content h3 {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 0;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            var searchText = this.value.toLowerCase();
+            var rows = document.querySelectorAll('#usersTable tbody tr');
+            
+            rows.forEach(function(row) {
+                var text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchText) ? '' : 'none';
+            });
+        });
+        
+        // Status filter
+        document.getElementById('statusFilter').addEventListener('change', function() {
+            var filterValue = this.value.toLowerCase();
+            var rows = document.querySelectorAll('#usersTable tbody tr');
+            
+            rows.forEach(function(row) {
+                if (filterValue === '') {
+                    row.style.display = '';
+                } else {
+                    var statusCell = row.querySelector('td:nth-child(5)').textContent.toLowerCase();
+                    row.style.display = statusCell.includes(filterValue) ? '' : 'none';
+                }
+            });
+        });
+    </script>
+}

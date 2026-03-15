@@ -1,0 +1,175 @@
+@model IEnumerable<RestaurantFoodOrderingDeliverAdmin.Models.Leave>
+@{
+    ViewData["Title"] = "Leave Report";
+    var period = ViewBag.Period as string;
+
+    // Dynamic Grouping
+    var groupBy = period switch 
+    {
+        "month" => "month",
+        "year" => "year",
+        "week" => "week",
+        _ => "day"
+    };
+
+    // Helper for StartOfWeek
+    Func<DateTime, DateTime> getStartOfWeek = (dt) => 
+    {
+        int diff = (7 + (dt.DayOfWeek - DayOfWeek.Monday)) % 7;
+        return dt.AddDays(-1 * diff).Date;
+    };
+
+    // Trend Chart Data
+    var requestsByDate = Model
+        .GroupBy(l => groupBy == "month" ? new DateTime(l.StartDate.Year, l.StartDate.Month, 1) :
+                      groupBy == "year" ? new DateTime(l.StartDate.Year, 1, 1) : 
+                      groupBy == "week" ? getStartOfWeek(l.StartDate) :
+                      l.StartDate.Date)
+        .OrderBy(g => g.Key)
+        .Select(g => new { 
+            Date = groupBy == "month" ? g.Key.ToString("MMM yyyy") : 
+                   groupBy == "year" ? g.Key.ToString("yyyy") : 
+                   groupBy == "week" ? g.Key.ToString("dd MMM") + "-" + g.Key.AddDays(6).ToString("dd MMM") :
+                   g.Key.ToString("dd MMM"), 
+            Count = g.Count() 
+        })
+        .ToList();
+
+    var trendLabels = System.Text.Json.JsonSerializer.Serialize(requestsByDate.Select(x => x.Date));
+    var trendData = System.Text.Json.JsonSerializer.Serialize(requestsByDate.Select(x => x.Count));
+
+    // Status Chart Data (Distribution based on all selected data)
+    var statusCounts = Model
+        .GroupBy(l => l.Status)
+        .Select(g => new { Status = g.Key, Count = g.Count() })
+        .ToList();
+        
+    var statusLabels = System.Text.Json.JsonSerializer.Serialize(statusCounts.Select(x => x.Status));
+    var statusData = System.Text.Json.JsonSerializer.Serialize(statusCounts.Select(x => x.Count));
+    
+    var colors = statusCounts.Select(x => x.Status switch {
+        "Approved" => "#198754",
+        "Pending" => "#ffc107",
+        "Rejected" => "#dc3545",
+        _ => "#6c757d"
+    }).ToList();
+    var colorJson = System.Text.Json.JsonSerializer.Serialize(colors);
+}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Report")">Reports</a></li>
+                    <li class="breadcrumb-item active">Leave</li>
+                </ol>
+            </nav>
+            <h2 class="page-heading"><i class="fas fa-calendar-minus me-2"></i>Leave Requests Analytics</h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <div class="btn-group period-filter">
+                <a href="@Url.Action("Leave", new { period = "week" })" class="btn btn-outline-primary @(period == "week" ? "active" : "")">Week</a>
+                <a href="@Url.Action("Leave", new { period = "month" })" class="btn btn-outline-primary @(period == "month" ? "active" : "")">Month</a>
+                <a href="@Url.Action("Leave", new { period = "year" })" class="btn btn-outline-primary @(period == "year" ? "active" : "")">Year</a>
+                <a href="@Url.Action("Leave", new { period = "all" })" class="btn btn-outline-primary @(period == "all" ? "active" : "")">All</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trend Chart -->
+    <div class="row mb-4">
+        <div class="col-12">
+             <div class="card chart-card mb-4">
+                <div class="chart-header">
+                    <h5 class="chart-title">Request Volume Trend</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="leaveTrendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card chart-card h-100">
+                <div class="chart-header">
+                    <h5 class="chart-title">Status Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="height: 250px;">
+                        <canvas id="leaveStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3">
+                     <h5 class="card-title mb-0">Recent Requests</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4">Partner</th>
+                                    <th>Type</th>
+                                    <th>Duration</th>
+                                    <th>Dates</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.Take(10))
+                                {
+                                    <tr>
+                                        <td class="ps-4">@(item.DeliveryUser?.FullName ?? "Unknown")</td>
+                                        <td>@item.LeaveType</td>
+                                        <td>
+                                            @{
+                                                var days = (item.EndDate - item.StartDate).TotalDays + 1;
+                                            }
+                                            @days.ToString("0") Days
+                                        </td>
+                                        <td>@item.StartDate.ToString("dd MMM") - @item.EndDate.ToString("dd MMM")</td>
+                                        <td>
+                                            <span class="badge @(item.Status == "Approved" ? "bg-success" : 
+                                                                item.Status == "Rejected" ? "bg-danger" : "bg-warning")">
+                                                @item.Status
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script id="trendLabels" type="application/json">@Html.Raw(trendLabels)</script>
+    <script id="trendData" type="application/json">@Html.Raw(trendData)</script>
+    <script id="chartLabels" type="application/json">@Html.Raw(statusLabels)</script>
+    <script id="chartData" type="application/json">@Html.Raw(statusData)</script>
+    <script id="chartColors" type="application/json">@Html.Raw(colorJson)</script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var trendLabels = JSON.parse(document.getElementById('trendLabels').textContent);
+            var trendData = JSON.parse(document.getElementById('trendData').textContent);
+            var labels = JSON.parse(document.getElementById('chartLabels').textContent);
+            var data = JSON.parse(document.getElementById('chartData').textContent);
+            var colors = JSON.parse(document.getElementById('chartColors').textContent);
+
+            initLineChart('leaveTrendChart', trendLabels, trendData, 'Requests', '#fd7e14'); // Orange for leave
+            initDoughnutChart('leaveStatusChart', labels, data, colors);
+        });
+    </script>
+}

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"] - Delivery Admin Panel</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="~/css/admin-site.css">
+    <link rel="stylesheet" href="~/css/chart.css">
+</head>
+<body>
+    <!-- Navigation Header -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top admin-navbar">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="@Url.Action("Dashboard", "Home")">
+                <i class="fas fa-user-shield me-2"></i>Admin Panel
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <!-- Sidebar Logo Header -->
+        <div class="sidebar-logo">
+            <i class="fas fa-utensils"></i>
+            <span>Tasty Bites</span>
+        </div>
+        
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar-nav">
+            <ul class="sidebar-menu">
+                <li class="sidebar-item">
+                    <a href="@Url.Action("Dashboard", "Home")" class="sidebar-link">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="@Url.Action("DeliveryUsers", "User")" class="sidebar-link">
+                        <i class="fas fa-users-cog"></i>
+                        <span>Users Manage</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="@Url.Action("Index", "Attendance")" class="sidebar-link">
+                        <i class="fas fa-clipboard-check"></i>
+                        <span>Attendance Log</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="@Url.Action("Index", "Orders")" class="sidebar-link">
+                        <i class="fas fa-box-open"></i>
+                        <span>Order Manage</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="@Url.Action("Index", "Earnings")" class="sidebar-link">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>Earnings Log</span>
+                    </a>
+                </li>
+                <li class="sidebar-item has-submenu">
+                    <a href="#" class="sidebar-link submenu-toggle">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Leave</span>
+                        <i class="fas fa-chevron-right submenu-arrow"></i>
+                    </a>
+                    <ul class="sidebar-submenu">
+                        <li>
+                            <a href="@Url.Action("Index", "Leave")" class="sidebar-link">
+                                <i class="fas fa-list-alt"></i>
+                                <span>All Requests</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="@Url.Action("Create", "Leave")" class="sidebar-link">
+                                <i class="fas fa-plus-circle"></i>
+                                <span>Add Leave</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="sidebar-item">
+                    <a href="@Url.Action("Index", "Report")" class="sidebar-link">
+                         <i class="fas fa-chart-line"></i>
+                        <span>Reports</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <!-- Sidebar Footer - Admin Section -->
+        <div class="sidebar-footer">
+            <div class="sidebar-user">
+                <i class="fas fa-user-shield"></i>
+                <span>Administrator</span>
+            </div>
+            <a href="@Url.Action("Logout", "Auth")" class="sidebar-logout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content Wrapper -->
+    <div class="main-wrapper">
+        <!-- Main Content -->
+        <main class="main-content">
+            @RenderBody()
+        </main>
+
+    <!-- Footer -->
+    <footer class="footer admin-footer">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <h5><i class="fas fa-user-shield"></i>Admin Panel</h5>
+                    <p>Professional delivery management system for food ordering platform. Managing delivery partners efficiently.</p>
+                    <div class="footer-social">
+                        <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="@Url.Action("Dashboard", "Home")">Dashboard</a></li>
+                        <li><a href="@Url.Action("Index", "Report")">Analytics</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <h5>Contact Us</h5>
+                    <p>
+                        <i class="fas fa-envelope me-2"></i>admin@tastybites.com
+                    </p>
+                    <p>
+                        <i class="fas fa-phone me-2"></i>+91 1234567890
+                    </p>
+                    <p>
+                        <i class="fas fa-map-marker-alt me-2"></i>Mumbai, India
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Restaurant Food Ordering System. All rights reserved.</p>
+        </div>
+    </footer>
+    </div> <!-- Close main-wrapper -->
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="~/js/admin-site.js"></script>
+    <script src="~/js/chart.js"></script>
+    
+    <!-- Submenu Toggle Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Submenu toggle
+            const submenuToggles = document.querySelectorAll('.submenu-toggle');
+            submenuToggles.forEach(function(toggle) {
+                toggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const parent = this.parentElement;
+                    parent.classList.toggle('open');
+                });
+            });
+        });
+    </script>
+    
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
