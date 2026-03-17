@@ -23,4 +23,3 @@ CREATE TABLE IF NOT EXISTS `DeliveryAdmins` (
 -- =============================================
 INSERT INTO `DeliveryAdmins` (`Username`, `Password`, `FullName`, `Email`, `Phone`, `Address`, `City`, `State`, `IsActive`) VALUES
 ('deliveryadmin', 'admin123', 'Delivery Manager', 'delivery.admin@tastybites.com', '9876500001', '100 Ashram Road, Ahmedabad', 'Ahmedabad', 'Gujarat', 1),
-('deliveryadmin2', 'admin123', 'Delivery Supervisor', 'delivery.supervisor@tastybites.com', '9876500002', '200 Paldi, Ahmedabad', 'Ahmedabad', 'Gujarat', 1);
